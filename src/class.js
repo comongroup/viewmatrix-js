@@ -12,15 +12,20 @@ var Emitter = require('emitter');
  * @param {Object} [o] - Options for the instance.
  */
 function ViewMatrix (selector, o) {
+	// bind events to this
+	Emitter(this);
+
 	/**
 	 * The ViewMatrix instance's default values.
 	 * @var {Object}
 	 */
 	this.defaults = {
-		childSelector: 'img',
+		adjacentCount: 1,
+		childSelector: '*',
 		classPrefix: 'vm-',
 		classSuffixes: {
 			element: 'element',
+			infinite: 'infinite',
 			child: 'child',
 			current: 'current',
 			behind: 'behind',
@@ -28,7 +33,9 @@ function ViewMatrix (selector, o) {
 			beyond: 'beyond'
 		},
 		createTrack: true,
-		currentIndex: 0
+		currentIndex: 0,
+		handleZIndex: true,
+		infinite: false
 	};
 
 	/**
@@ -73,7 +80,36 @@ function ViewMatrix (selector, o) {
 	this.current = Utils.isType(this.options.currentIndex, 'number', 0);
 
 	/**
-	 * Refreshes the VM
+	 * Destroys the ViewMatrix's instance.
+	 */
+	this.destroy = function () {
+		// let's optimize
+		var child;
+
+		// reset current element
+		if (this.element) {
+			Utils.removeClassFromElement(this.element, [ clnames.element, clnames.infinite ]);
+		}
+
+		// reset current children
+		if (this.children && this.children.length > 0) {
+			for (var i = 0; i < this.children.length; i++) {
+				child = this.children[i];
+				Utils.removeClassFromElement(child, [ clnames.child, clnames.current, clnames.beyond, clnames.behind, clnames.ahead ] );
+				Utils.setElementStyle(child, 'z-index', null);
+			}
+		}
+
+		// trigger event
+		this.emit('destroyed', this.element, this.children);
+
+		// reset vars
+		this.element = null;
+		this.children = null;
+	};
+
+	/**
+	 * Refreshes the ViewMatrix's instance.
 	 *
 	 * @param {String|Element} selector - The query selector to find the element.
 	 * @param {String} [childSelector] - An optional query selector to filter children.
@@ -82,25 +118,8 @@ function ViewMatrix (selector, o) {
 		// let's optimize
 		var child;
 
-		// reset current element
-		if (this.element) {
-			Utils.removeClassFromElement(child, clnames.element);
-		}
-
-		// reset current children
-		if (this.children && this.children.length > 0) {
-			for (var i = 0; i < this.children.length; i++) {
-				child = this.children[i];
-				Utils.removeClassFromElement(child, clnames.child);
-				Utils.removeClassFromElement(child, clnames.current);
-				Utils.removeClassFromElement(child, clnames.behind);
-				Utils.removeClassFromElement(child, clnames.ahead);
-			}
-		}
-
-		// reset vars
-		this.element = null;
-		this.children = null;
+		// destroy first
+		this.destroy();
 
 		// check if we have an object,
 		// if we do, POPULATE ALL THE VARS
@@ -118,10 +137,11 @@ function ViewMatrix (selector, o) {
 		}
 
 		// set children, total and index
-		this.children = Utils.findChildrenInElement(this.element, childSelector);
+		// (also update the childSelector in the options to this one)
+		this.options.childSelector = Utils.isType(childSelector, 'string', this.options.childSelector);
+		this.children = Utils.findChildrenInElement(this.element, this.options.childSelector);
 		this.total = this.children.length;
 		this.current = this.wrap(this.current);
-		this.options.childSelector = childSelector;
 
 		// add classes to new children
 		for (var i = 0; i < this.children.length; i++) {
@@ -134,6 +154,10 @@ function ViewMatrix (selector, o) {
 
 		// add classes to the element
 		Utils.addClassToElement(this.element, clnames.element);
+		Utils.toggleClassInElement(this.element, clnames.infinite, this.options.infinite);
+
+		// trigger event
+		this.emit('initialized', this.element, this.children);
 	};
 
 	/**
@@ -143,35 +167,83 @@ function ViewMatrix (selector, o) {
 	 * @returns {HTMLElement}
 	 */
 	this.slide = function (index) {
-		// get current children, and cancel if empty
-		var children = this.children;
-		if (children.length === 0) return null;
+		if (this.children.length === 0) return null;
 
 		// let's optimize
 		var child;
+		var offset;
+		var isAhead;
+		var isBehind;
+		var isBeyond;
 
 		// wrap index for safety
 		index = this.wrap(index);
 
+		// calc values for infinity
+		var adjacentCount = Math.max(1, this.options.adjacentCount);
+		var lowerLimit = adjacentCount;
+		var upperLimit = this.children.length - adjacentCount;
+		var isNearStart = index < adjacentCount;
+		var isNearEnd = index >= upperLimit;
+
+		// trigger before event
+		this.emit('beforeslide', this.current, index);
+
 		// add or remove classes from children
-		for (var i = 0; i < children.length; i++) {
-			child = children[i];
+		for (var i = 0; i < this.children.length; i++) {
+			child = this.children[i];
+			offset = Math.abs(index - i);
 
 			if (i === index) {
-				Utils.removeClassFromElement(child, clnames.behind);
-				Utils.removeClassFromElement(child, clnames.ahead);
+				// this is the new current element
+				// remove all old classes and add the "vm-current" one
+				Utils.removeClassFromElement(child, [ clnames.ahead, clnames.behind, clnames.beyond ]);
 				Utils.addClassToElement(child, clnames.current);
 			}
 			else {
+				// this is not a current element,
+				// figure out if it's before or after
+				isAhead = i > index;
+				isBehind = i < index;
+
+				// handling infinity (stones)?
+				// check if the item should be on the opposite side of where it'd normally be
+				if (this.options.infinite) {
+					if (isNearStart && i >= upperLimit) {
+						offset = Math.abs(index - (i - this.children.length));
+						isAhead = false;
+						isBehind = true;
+					}
+					else if (isNearEnd && i < lowerLimit) {
+						offset = Math.abs(index - (i + this.children.length));
+						isAhead = true;
+						isBehind = false;
+					}
+				}
+
+				// check if it's beyond the adjacent scope
+				isBeyond = offset > adjacentCount;
+
+				// remove "current" and toggle other classes
 				Utils.removeClassFromElement(child, clnames.current);
-				Utils.toggleClassInElement(child, clnames.behind, i < index);
-				Utils.toggleClassInElement(child, clnames.ahead, i > index);
+				Utils.toggleClassInElement(child, clnames.beyond, isBeyond);
+				Utils.toggleClassInElement(child, clnames.behind, isBehind);
+				Utils.toggleClassInElement(child, clnames.ahead, isAhead);
+			}
+
+			// if we're handling z-index, fix it
+			if (this.options.handleZIndex) {
+				Utils.setElementStyle(child, 'z-index', this.children.length - offset);
 			}
 		}
 
 		// set new index
 		this.current = index;
-		return children[index];
+
+		// trigger event
+		this.emit('slide', index);
+
+		return this.children[index];
 	};
 
 	/**

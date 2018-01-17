@@ -76,18 +76,22 @@ var Utils = {
 	 * Removes a class from a given HTML element.
 	 *
 	 * @param {Element} el - The element to remove the class from.
-	 * @param {String} str - The class to remove.
+	 * @param {String|Array<String>} str - The class to remove.
 	 */
 	removeClassFromElement: function (el, str) {
-		var classes = this.sanitizeString(str).split(' ');
+		var classes = !(str instanceof Array)
+			? this.sanitizeString(str).split(' ')
+			: str;
 		var result = el.className.trim();
 		for (var i = 0; i < classes.length; i++) {
 			if (result.indexOf(classes[i]) !== -1) {
-				console.log('remove', classes[i], 'from', result);
 				result = result.replace(classes[i], '');
 			}
 		}
 		el.className = this.sanitizeString(result);
+		if (el.className.length === 0) {
+			el.removeAttribute('class');
+		}
 	},
 
 	/**
@@ -98,6 +102,32 @@ var Utils = {
 	 */
 	sanitizeString: function (str) {
 		return this.isType(str, 'string', '').trim().replace(/\s\s+/g, ' ');
+	},
+
+	/**
+	 * Sets the inline style of an element.
+	 * If "null" is provided as the value, the style will be erased.
+	 *
+	 * @param {Element} el - The element to style.
+	 * @param {String} name - The name of the style to add.
+	 * @param {any} value - The value for the style. A value of "null" will erase the style.
+	 * @returns {String}
+	 */
+	setElementStyle: function (el, name, value) {
+		var style = this.sanitizeString(el.getAttribute('style') || '');
+		if (value == null || style.indexOf(name + ':') !== -1) {
+			style = style.replace(new RegExp(name + ':[^;]+;', 'g'), '');
+		}
+		if (value != null) {
+			style += name + ':' + value + ';';
+		}
+		if (style.length > 0) {
+			el.setAttribute('style', this.sanitizeString(style));
+		}
+		else {
+			el.removeAttribute('style');
+		}
+		return style;
 	},
 
 	/**

@@ -7,45 +7,68 @@ body {
 	font-family: Helvetica, Arial, sans-serif;
 }
 
+img {
+	display: block;
+	margin: 0 auto;
+	max-width: 100%;
+}
+
 .overflower {
 	overflow: hidden;
 }
 
 .container {
-	max-width: 608px;
+	max-width: 500px;
 	margin: 0px auto;
 	padding: 20px;
 }
 
-.example-1 {
+.example {
 	position: relative;
 	width: 100%;
 	padding-top: 56.25%;
 	margin: 0 auto;
 }
 
-.example-1 img {
+.example .vm-child {
 	position: absolute;
 	display: block;
 	margin: 0 auto;
 	max-width: 100%;
+	left: 0;
 	top: 0;
 }
 
-.example-1.vm-element img {
+.example .vm-child span {
+	position: absolute;
+	right: 20px;
+	bottom: 20px;
+	font-size: 20px;
+	color: white;
+}
+
+.example.vm-element .vm-child {
 	transition: all ease .2s;
 }
 
-.example-1 img.vm-current {
-	left: 0;
+.example .vm-child.vm-current {
+	z-index: 2;
+}
+
+.example .vm-child.vm-behind,
+.example .vm-child.vm-ahead {
 	z-index: 1;
 }
 
-.example-1 img.vm-behind,
-.example-1 img.vm-ahead {
-	transform: scale(0.8);
-	opacity: 0.8;
+.example .vm-child.vm-behind { transform: translateX(-90%) scale(0.8); }
+.example .vm-child.vm-ahead { transform: translateX(90%) scale(0.8); }
+
+.example .vm-child.vm-beyond {
+	opacity: 0;
+	left: 0;
+	z-index: 0;
 }
 
-.example-1 img.vm-behind { left: -90%; }
-.example-1 img.vm-ahead { left: 90%; }
+.example.vm-infinite .vm-child.vm-beyond {
+	transform: scale(0.6);
+}
