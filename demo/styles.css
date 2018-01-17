@@ -7,15 +7,20 @@ body {
 	font-family: Helvetica, Arial, sans-serif;
 }
 
+.overflower {
+	overflow: hidden;
+}
+
 .container {
-	width: 608px;
-	margin: 10px auto;
+	max-width: 608px;
+	margin: 0px auto;
+	padding: 20px;
 }
 
 .example-1 {
 	position: relative;
-	width: 608px;
-	height: 342px;
+	width: 100%;
+	padding-top: 56.25%;
 	margin: 0 auto;
 }
 
@@ -24,6 +29,7 @@ body {
 	display: block;
 	margin: 0 auto;
 	max-width: 100%;
+	top: 0;
 }
 
 .example-1.vm-element img {
@@ -41,5 +47,5 @@ body {
 	opacity: 0.8;
 }
 
-.example-1 img.vm-behind { left: -500px; }
-.example-1 img.vm-ahead { left: 500px; }
+.example-1 img.vm-behind { left: -90%; }
+.example-1 img.vm-ahead { left: 90%; }
