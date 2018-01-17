@@ -1,0 +1,45 @@
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	font-family: Helvetica, Arial, sans-serif;
+}
+
+.container {
+	width: 608px;
+	margin: 10px auto;
+}
+
+.example-1 {
+	position: relative;
+	width: 608px;
+	height: 342px;
+	margin: 0 auto;
+}
+
+.example-1 img {
+	position: absolute;
+	display: block;
+	margin: 0 auto;
+	max-width: 100%;
+}
+
+.example-1.vm-element img {
+	transition: all ease .2s;
+}
+
+.example-1 img.vm-current {
+	left: 0;
+	z-index: 1;
+}
+
+.example-1 img.vm-behind,
+.example-1 img.vm-ahead {
+	transform: scale(0.8);
+	opacity: 0.8;
+}
+
+.example-1 img.vm-behind { left: -500px; }
+.example-1 img.vm-ahead { left: 500px; }
