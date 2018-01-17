@@ -1,0 +1,28 @@
+{
+  "name": "viewmatrix-js",
+  "version": "0.0.1",
+  "description": "Javascript media browsing component",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/comongroup/viewmatrix-js.git"
+  },
+  "author": "comOn Group",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/comongroup/viewmatrix-js/issues"
+  },
+  "homepage": "https://comongroup.github.com/viewmatrix-js",
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-browserify": "^5.2.0",
+    "grunt-contrib-clean": "^1.0.0",
+    "grunt-contrib-uglify": "^3.3.0",
+    "grunt-contrib-watch": "^1.0.0",
+    "load-grunt-config": "^0.19.2",
+    "time-grunt": "^1.4.0"
+  },
+  "dependencies": {
+    "component-emitter": "^1.2.1"
+  }
+}

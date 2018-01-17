@@ -1,5 +1,3 @@
-import { ViewMatrix } from '../src/class';
-
 var example1 = new ViewMatrix('.example-1', {
 	currentIndex: 1
 });

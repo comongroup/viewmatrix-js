@@ -1,0 +1,14 @@
+default:
+  tasks:
+    - build # build the file
+
+build:
+  tasks:
+    - clean:bin # clear the distribution folder
+    - browserify:bin # join up all of the js
+    - uglify:bin # minify our generated js
+
+develop:
+  tasks:
+    - build # build the initial file
+    - watch # keep watching for changes

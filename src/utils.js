@@ -1,4 +1,4 @@
-import { ViewMatrix } from './class';
+'use strict';
 
 var Utils = {
 
@@ -30,21 +30,6 @@ var Utils = {
 		return this.isType(selector, 'string')
 			? el.querySelectorAll(':scope > ' + selector)
 			: el.querySelectorAll('*');
-	},
-
-	/**
-	 * Returns "instance" if the method was given
-	 * an instance of ViewMatrix. Throws an exception otherwise.
-	 *
-	 * @param {ViewMatrix} instance - The instance to check.
-	 * @returns {ViewMatrix}
-	 * @throws {TypeError}
-	 */
-	giveInstanceOrDie: function (instance) {
-		if (!(instance instanceof ViewMatrix)) {
-			throw new TypeError('Method was given an invalid ViewMatrix instance');
-		}
-		return instance;
 	},
 
 	/**
@@ -159,4 +144,4 @@ var Utils = {
 };
 
 // export object
-export { Utils };
+module.exports = Utils;
