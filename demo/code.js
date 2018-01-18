@@ -18,3 +18,14 @@ var example2 = new ViewMatrix('.example-2', {
 
 document.querySelector('.example-2-prev').addEventListener('click', function () { example2.inc(-1); });
 document.querySelector('.example-2-next').addEventListener('click', function () { example2.inc(+1); });
+
+var example3 = new ViewMatrix('.example-3', {
+	infinite: true,
+});
+var example3touch = new ViewMatrixTouch(example3, {
+	preventDefault: true,
+	swipeVertical: true
+});
+
+document.querySelector('.example-3-prev').addEventListener('click', function () { example3.inc(-1); });
+document.querySelector('.example-3-next').addEventListener('click', function () { example3.inc(+1); });

@@ -47,3 +47,10 @@
 .example-container.vm-infinite .vm-child.vm-beyond {
 	transform: scale(0.6);
 }
+
+.example-container.example-3 {
+	overflow: hidden;
+}
+
+.example-container.example-3 .vm-child.vm-behind { transform: translateY(-90%); }
+.example-container.example-3 .vm-child.vm-ahead { transform: translateY(90%); }

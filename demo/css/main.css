@@ -34,6 +34,7 @@ img {
 	padding: 10px;
 	border: 1px solid rgb(255, 170, 0);
 	background: rgb(252, 219, 169);
+	overflow: auto;
 }
 
 .example pre::before {

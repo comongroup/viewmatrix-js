@@ -46,6 +46,21 @@ var Utils = {
 	},
 
 	/**
+	 * Returns "instance" if the method was given
+	 * an instance of ViewMatrix. Throws an exception otherwise.
+	 *
+	 * @param {ViewMatrix} instance - The instance to check.
+	 * @returns {ViewMatrix}
+	 * @throws {TypeError}
+	 */
+	giveInstanceOrDie: function (instance) {
+		if (!(instance instanceof ViewMatrix)) {
+			throw new TypeError('Method was given an invalid ViewMatrix instance');
+		}
+		return instance;
+	},
+
+	/**
 	 * Checks if "v" is of given "type",
 	 * and if not, returns "d" (or null if "d" is undefined).
 	 *
