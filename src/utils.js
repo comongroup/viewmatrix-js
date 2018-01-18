@@ -20,6 +20,19 @@ var Utils = {
 	},
 
 	/**
+	 * Clamps a given "value" between "min" and "max",
+	 * so it never overflows.
+	 *
+	 * @param {Number} value - The value to clamp.
+	 * @param {Number} min - Minimum value, inclusive.
+	 * @param {Number} max - Maximum value, inclusive.
+	 * @returns {Number}
+	 */
+	clampNumber: function (value, min, max) {
+		return Math.max(min, Math.min(max, value));
+	},
+
+	/**
 	 * Returns children inside an element.
 	 *
 	 * @param {Element} el - The element to return children from.

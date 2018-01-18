@@ -1,5 +1,5 @@
 /*
- * viewmatrix.js v0.0.1 (2018-01-17 23:14:37)
+ * viewmatrix.js v0.0.1 (2018-01-18 21:26:45)
  * @author comOn Group
  */
 
@@ -49,7 +49,9 @@ function ViewMatrix (selector, o) {
 		createTrack: true,
 		currentIndex: 0,
 		handleZIndex: true,
-		infinite: false
+		infinite: false,
+		parentSelector: null,
+		wrapIndex: true
 	};
 
 	/**
@@ -135,6 +137,11 @@ function ViewMatrix (selector, o) {
 		// destroy first
 		this.destroy();
 
+		// get a valid selector
+		selector = selector != null
+			? selector
+			: this.options.parentSelector;
+
 		// check if we have an object,
 		// if we do, POPULATE ALL THE VARS
 		if (typeof selector === 'string') {
@@ -152,6 +159,7 @@ function ViewMatrix (selector, o) {
 
 		// set children, total and index
 		// (also update the childSelector in the options to this one)
+		this.options.parentSelector = selector;
 		this.options.childSelector = Utils.isType(childSelector, 'string', this.options.childSelector);
 		this.children = Utils.findChildrenInElement(this.element, this.options.childSelector);
 		this.total = this.children.length;
@@ -181,7 +189,7 @@ function ViewMatrix (selector, o) {
 	 * @returns {HTMLElement}
 	 */
 	this.slide = function (index) {
-		if (this.children.length === 0) return null;
+		if (!this.children || this.children.length === 0) return null;
 
 		// let's optimize
 		var child;
@@ -201,7 +209,7 @@ function ViewMatrix (selector, o) {
 		var isNearEnd = index >= upperLimit;
 
 		// trigger before event
-		this.emit('beforeslide', this.current, index);
+		this.emit('beforeslide', this.current, index, this.total);
 
 		// add or remove classes from children
 		for (var i = 0; i < this.children.length; i++) {
@@ -251,11 +259,11 @@ function ViewMatrix (selector, o) {
 			}
 		}
 
+		// trigger event
+		this.emit('slide', this.current, index, this.total);
+
 		// set new index
 		this.current = index;
-
-		// trigger event
-		this.emit('slide', index);
 
 		return this.children[index];
 	};
@@ -277,7 +285,10 @@ function ViewMatrix (selector, o) {
 	 * @returns {Number}
 	 */
 	this.wrap = function (index) {
-		return Utils.wrapNumber(index, 0, this.total - 1);
+		var max = this.total - 1;
+		return this.options.wrapIndex
+			? Utils.wrapNumber(index, 0, max)
+			: Utils.clampNumber(index, 0, max);
 	};
 
 	// initialize the container
@@ -310,6 +321,19 @@ var Utils = {
 			}
 		}
 		el.className = this.sanitizeString(result);
+	},
+
+	/**
+	 * Clamps a given "value" between "min" and "max",
+	 * so it never overflows.
+	 *
+	 * @param {Number} value - The value to clamp.
+	 * @param {Number} min - Minimum value, inclusive.
+	 * @param {Number} max - Maximum value, inclusive.
+	 * @returns {Number}
+	 */
+	clampNumber: function (value, min, max) {
+		return Math.max(min, Math.min(max, value));
 	},
 
 	/**

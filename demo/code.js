@@ -1,5 +1,5 @@
 var example1 = new ViewMatrix('.example-1', {
-
+	wrapIndex: false
 });
 
 document.querySelector('.example-1-prev').addEventListener('click', function () { example1.inc(-1); });
