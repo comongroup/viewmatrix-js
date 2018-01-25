@@ -22,8 +22,7 @@ function ViewMatrix (selector, o) {
 	this.defaults = {
 		adjacentCount: 1,
 		childSelector: '*',
-		classPrefix: 'vm-',
-		classSuffixes: {
+		classAliases: {
 			element: 'element',
 			infinite: 'infinite',
 			child: 'child',
@@ -32,6 +31,7 @@ function ViewMatrix (selector, o) {
 			ahead: 'ahead',
 			beyond: 'beyond'
 		},
+		classPrefix: 'vm-',
 		createTrack: true,
 		currentIndex: 0,
 		handleZIndex: true,
@@ -44,16 +44,16 @@ function ViewMatrix (selector, o) {
 	 * The ViewMatrix instance's options.
 	 * @var {Object}
 	 */
-	this.options = Utils.mergeObjects(this.defaults, Utils.isType(o, 'object', {}));
+	this.options = Utils.prepareInstanceOptions(this.defaults, o);
 
 	// frequent class names
 	// that we're gonna use a lot
 	var clnames = {};
 	var prefix = Utils.isType(this.options.classPrefix, 'string', this.defaults.classPrefix);
-	var suffixes = Utils.isType(this.options.classSuffixes, 'object', this.defaults.classSuffixes);
-	for (var k in suffixes) {
-		if (Object.prototype.hasOwnProperty.call(suffixes, k)) {
-			clnames[k] = prefix + suffixes[k];
+	var aliases = Utils.isType(this.options.classAliases, 'object', this.defaults.classAliases);
+	for (var k in aliases) {
+		if (Object.prototype.hasOwnProperty.call(aliases, k)) {
+			clnames[k] = prefix + aliases[k];
 		}
 	}
 
@@ -103,7 +103,7 @@ function ViewMatrix (selector, o) {
 		}
 
 		// trigger event
-		this.emit('destroyed', this.element, this.children);
+		this.emit('destroy', this.element, this.children);
 
 		// reset vars
 		this.element = null;
@@ -165,7 +165,7 @@ function ViewMatrix (selector, o) {
 		Utils.toggleClassInElement(this.element, clnames.infinite, this.options.infinite);
 
 		// trigger event
-		this.emit('initialized', this.element, this.children);
+		this.emit('initialize', this.element, this.children);
 	};
 
 	/**
@@ -195,7 +195,7 @@ function ViewMatrix (selector, o) {
 		var isNearEnd = index >= upperLimit;
 
 		// trigger before event
-		this.emit('beforeslide', this.current, index, this.total);
+		this.emit('slide:before', this.current, index, this.total);
 
 		// add or remove classes from children
 		for (var i = 0; i < this.children.length; i++) {
@@ -263,6 +263,14 @@ function ViewMatrix (selector, o) {
 	this.inc = function (inc) {
 		return this.slide(this.current + Utils.isType(inc, 'number', 0));
 	};
+
+
+	this.toggle = function (name, condition) {
+		if (this.element) {
+			Utils.toggleClassInElement(this.element, prefix + name, condition);
+		}
+	};
+
 
 	/**
 	 * Wraps a given "index" to be safe.

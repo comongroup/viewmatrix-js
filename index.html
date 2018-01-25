@@ -14,12 +14,17 @@
 			<h1>viewmatrix.js</h1>
 
 			<div class="example">
-				<h2>Simple example</h2>
+				<h2>Simple gallery</h2>
+				<p>
+					Basic gallery, with default options and no extra modules.
+				</p>
+				<p>
+					The core ViewMatrix experience only messes with classes,
+					meaning all visual effects below are achieved using CSS.
+				</p>
 				<pre>
-var example1 = new ViewMatrix('.example-1', {
-	wrapIndex: false
-});</pre>
-				<div class="example-container example-1">
+var example1 = new <b>ViewMatrix</b>('.example-1');</pre>
+				<div class="example-container-css example-1">
 					<div><img src="demo/images/1.jpg" /><span>1</span></div>
 					<div><img src="demo/images/2.jpg" /><span>2</span></div>
 					<div><img src="demo/images/3.jpg" /><span>3</span></div>
@@ -33,12 +38,20 @@ var example1 = new ViewMatrix('.example-1', {
 			</div>
 
 			<div class="example">
-				<h2>Infinite example</h2>
+				<h2>Infinite carousel</h2>
+				<p>
+					A carousel that wraps around itself when enough elements exist.
+				</p>
+				<p>
+					ViewMatrix makes sure the necessary elements get their classes,
+					but with <code>infinite</code> enabled, it also makes sure the
+					elements at the edges of the carousel have the opposite classes.
+				</p>
 				<pre>
-var example2 = new ViewMatrix('.example-2', {
+var example2 = new <b>ViewMatrix</b>('.example-2', {
 	infinite: true
 });</pre>
-				<div class="example-container example-2">
+				<div class="example-container-css example-2">
 					<div><img src="demo/images/1.jpg" /><span>1</span></div>
 					<div><img src="demo/images/2.jpg" /><span>2</span></div>
 					<div><img src="demo/images/3.jpg" /><span>3</span></div>
@@ -52,16 +65,17 @@ var example2 = new ViewMatrix('.example-2', {
 			</div>
 
 			<div class="example">
-				<h2>Vertical example (with swipe)</h2>
+				<h2>Autoplaying gallery</h2>
+				<p>
+					A gallery that changes slides over time, until manually interacted with.
+				</p>
 				<pre>
-var example3 = new ViewMatrix('.example-3', {
-	infinite: true
-});
-var example3touch = new ViewMatrixTouch(example3, {
-	preventDefault: true,
-	swipeVertical: true
+var example3 = new <b>ViewMatrix</b>('.example-3');
+var example3autoplay = new <b>ViewMatrix.Autoplay</b>(example3, {
+	direction: +1,
+	interval: 3
 });</pre>
-				<div class="example-container example-3">
+				<div class="example-container-css example-3">
 					<div><img src="demo/images/1.jpg" /><span>1</span></div>
 					<div><img src="demo/images/2.jpg" /><span>2</span></div>
 					<div><img src="demo/images/3.jpg" /><span>3</span></div>
@@ -71,6 +85,40 @@ var example3touch = new ViewMatrixTouch(example3, {
 				<div class="align-center">
 					<button class="example-button example-3-prev">prev</button>
 					<button class="example-button example-3-next">next</button>
+					<button class="example-button example-3-play">▶</button>
+					<button class="example-button example-3-pause" disabled>⏸</button>
+				</div>
+			</div>
+
+			<div class="example">
+				<h2>Vertical carousel "window", with swipe</h2>
+				<p>
+					Self-contained carousel, with CSS styles overriden to make it look vertical,
+					and with "quick swipe" capabilities using the <code>Touch</code> module.
+				</p>
+				<p>
+					<code>infinite</code> is enabled to make sure the slides are put at the right place when navigating in the carousel's edges.
+					<code>preventDefault</code> also makes sure the window doesn't move around while swiping on mobile.
+				</p>
+				<pre>
+var example4 = new <b>ViewMatrix</b>('.example-4', {
+	infinite: true
+});
+var example4touch = new <b>ViewMatrix.Touch</b>(example4, {
+	preventDefault: true,
+	swipe: true,
+	swipeVertical: true
+});</pre>
+				<div class="example-container-css example-vertical example-4">
+					<div><img src="demo/images/1.jpg" /><span>1</span></div>
+					<div><img src="demo/images/2.jpg" /><span>2</span></div>
+					<div><img src="demo/images/3.jpg" /><span>3</span></div>
+					<div><img src="demo/images/4.jpg" /><span>4</span></div>
+					<div><img src="demo/images/5.jpg" /><span>5</span></div>
+				</div>
+				<div class="align-center">
+					<button class="example-button example-4-prev">prev</button>
+					<button class="example-button example-4-next">next</button>
 				</div>
 			</div>
 

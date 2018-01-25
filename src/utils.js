@@ -9,6 +9,7 @@ var Utils = {
 	 * @param {String} str - The class to add.
 	 */
 	addClassToElement: function (el, str) {
+		if (!(el instanceof Element)) return;
 		var classes = this.sanitizeString(str).split(' ');
 		var result = el.className.trim();
 		for (var i = 0; i < classes.length; i++) {
@@ -101,12 +102,28 @@ var Utils = {
 	},
 
 	/**
+	 * Merges "defaults" with the given "options" object.
+	 *
+	 * @param {Object} defaults - The instance's default options.
+	 * @param {Object} options - The options that were passed onto the instance's constructor.
+	 * @returns {Object}
+	 */
+	prepareInstanceOptions: function (defaults, options) {
+		return this.mergeObjects(
+			{},
+			this.isType(defaults, 'object', {}),
+			this.isType(options, 'object', {})
+		);
+	},
+
+	/**
 	 * Removes a class from a given HTML element.
 	 *
 	 * @param {Element} el - The element to remove the class from.
 	 * @param {String|Array<String>} str - The class to remove.
 	 */
 	removeClassFromElement: function (el, str) {
+		if (!(el instanceof Element)) return;
 		var classes = !(str instanceof Array)
 			? this.sanitizeString(str).split(' ')
 			: str;

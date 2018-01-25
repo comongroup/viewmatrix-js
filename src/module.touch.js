@@ -37,14 +37,14 @@ function getCoordinateDelta (c1, c2) {
 		x: c1.x - c2.x,
 		y: c1.y - c2.y
 	};
-}
+};
 
 /**
  * Creates a new ViewMatrixTouch instance.
  *
  * @constructor
  * @param {ViewMatrix} instance - The ViewMatrix instance.
- * @param {Object} [o] - Options for the touch instance.
+ * @param {Object} [o] - Options for the module.
  */
 function ViewMatrixTouch (instance, o) {
 	var self = this;
@@ -52,10 +52,16 @@ function ViewMatrixTouch (instance, o) {
 	/**
 	 * The ViewMatrixTouch instance's default values.
 	 * @var {Object}
+	 * @property {String} classAlias - Together with the instance's "classPrefix" option, defines the class to toggle when the element is being touched. Default is "touching".
+	 * @property {Boolean} preventDefault - Tells the module it should call preventDefault() when a touch is started. Default is "false".
+	 * @property {Boolean} swipe - If true, the module detects swipes in the element and navigates automatically. Default is "false".
+	 * @property {Boolean} swipeVertical - If true, the module will handle vertical deltas instead of horizontal. Default is "false".
+	 * @property {Number} swipeTolerance - Amount of pixels the delta must be until a swipe is registered. Default is "30".
 	 */
 	this.defaults = {
+		classAlias: 'touching',
 		preventDefault: false,
-		swipe: true,
+		swipe: false,
 		swipeVertical: false,
 		swipeTolerance: 30
 	};
@@ -64,7 +70,7 @@ function ViewMatrixTouch (instance, o) {
 	 * The ViewMatrixTouch instance's options.
 	 * @var {Object}
 	 */
-	this.options = Utils.mergeObjects(this.defaults, Utils.isType(o, 'object', {}));
+	this.options = Utils.prepareInstanceOptions(this.defaults, o);
 
 	// check if it's a valid instance or give up
 	instance = Utils.giveInstanceOrDie(instance);
@@ -74,12 +80,17 @@ function ViewMatrixTouch (instance, o) {
 	var touchLast = null;
 	var touchDiff = null;
 	var target = null;
+	var alias = Utils.isType(self.options.classAlias, 'string', false);
 
 	// callback that is passed to touchmove events,
 	// so that touch can be cancelled on the other side
 	function cancelTouch (emit) {
+		if (alias !== false) {
+			instance.toggle(alias, false);
+		}
+
 		if (emit !== false) {
-			instance.emit('touchcancel', target, touchLast);
+			instance.emit('touch:cancel', target, touchLast);
 		}
 
 		touchStart = null;
@@ -101,7 +112,11 @@ function ViewMatrixTouch (instance, o) {
 				evt.preventDefault();
 			}
 
-			instance.emit('touchstart', target, coords);
+			if (alias !== false) {
+				instance.toggle(alias, true);
+			}
+
+			instance.emit('touch:start', target, coords);
 		}
 	};
 
@@ -115,7 +130,7 @@ function ViewMatrixTouch (instance, o) {
 		touchLast = getCoordinates(evt);
 		touchDiff = getCoordinateDelta(touchStart, touchLast);
 
-		instance.emit('touchmove', target, touchDiff, cancelTouch);
+		instance.emit('touch:move', target, touchDiff, cancelTouch);
 
 		if (self.options.swipe && handleTouchSwipe(touchDiff)) {
 			cancelTouch(false);
@@ -139,18 +154,18 @@ function ViewMatrixTouch (instance, o) {
 		}
 
 		if (delta > self.options.swipeTolerance) {
-			instance.emit('swipenext', target, touchDiff);
+			instance.emit('swipe:next', target, touchDiff);
 			instance.inc(+1);
 			return true;
 		}
 		else if (delta < -self.options.swipeTolerance) {
-			instance.emit('swipeprev', target, touchDiff);
+			instance.emit('swipe:prev', target, touchDiff);
 			instance.inc(-1);
 			return true;
 		}
 
 		return false;
-	}
+	};
 
 	// event to handle touch end,
 	// just cancels any touching
@@ -159,12 +174,12 @@ function ViewMatrixTouch (instance, o) {
 			return;
 		}
 
-		instance.emit('touchend', target, touchLast);
+		instance.emit('touch:end', target, touchLast);
 		cancelTouch(false);
-	}
+	};
 
 	/**
-	 * Binds touch events to the ViewMatrix element.
+	 * Binds touch events to the document.
 	 */
 	this.bindEvents = function () {
 		cancelTouch(false);
@@ -178,10 +193,10 @@ function ViewMatrixTouch (instance, o) {
 		document.addEventListener('mousedown', handleTouchStart, { passive: false });
 		document.addEventListener('mousemove', handleTouchMove, { passive: false });
 		document.addEventListener('mouseup', handleTouchEnd, { passive: false });
-	}
+	};
 
 	/**
-	 * Unbinds touch events from the ViewMatrix element.
+	 * Unbinds touch events from the document.
 	 */
 	this.unbindEvents = function () {
 		cancelTouch(false);
@@ -195,7 +210,7 @@ function ViewMatrixTouch (instance, o) {
 		document.removeEventListener('mousedown', handleTouchStart, { passive: false });
 		document.removeEventListener('mousemove', handleTouchMove, { passive: false });
 		document.removeEventListener('mouseup', handleTouchEnd, { passive: false });
-	}
+	};
 
 	// bind to instance events,
 	// so when instance is destroyed/reinitialized

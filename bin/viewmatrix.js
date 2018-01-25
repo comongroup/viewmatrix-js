@@ -1,5 +1,5 @@
 /*
- * viewmatrix.js v0.0.1 (2018-01-18 23:28:43)
+ * viewmatrix.js v0.0.1 (2018-01-25 23:22:55)
  * @author comOn Group
  */
 
@@ -8,11 +8,12 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
 (function (scope) {
 
 	scope.ViewMatrix = require('./src/class');
-	scope.ViewMatrixTouch = require('./src/touch');
+	scope.ViewMatrix.Autoplay = require('./src/module.autoplay');
+	scope.ViewMatrix.Touch = require('./src/module.touch');
 
 })(window);
 
-},{"./src/class":2,"./src/touch":3}],2:[function(require,module,exports){
+},{"./src/class":2,"./src/module.autoplay":3,"./src/module.touch":4}],2:[function(require,module,exports){
 'use strict';
 
 // import Emitter and Utils
@@ -37,8 +38,7 @@ function ViewMatrix (selector, o) {
 	this.defaults = {
 		adjacentCount: 1,
 		childSelector: '*',
-		classPrefix: 'vm-',
-		classSuffixes: {
+		classAliases: {
 			element: 'element',
 			infinite: 'infinite',
 			child: 'child',
@@ -47,6 +47,7 @@ function ViewMatrix (selector, o) {
 			ahead: 'ahead',
 			beyond: 'beyond'
 		},
+		classPrefix: 'vm-',
 		createTrack: true,
 		currentIndex: 0,
 		handleZIndex: true,
@@ -59,16 +60,16 @@ function ViewMatrix (selector, o) {
 	 * The ViewMatrix instance's options.
 	 * @var {Object}
 	 */
-	this.options = Utils.mergeObjects(this.defaults, Utils.isType(o, 'object', {}));
+	this.options = Utils.prepareInstanceOptions(this.defaults, o);
 
 	// frequent class names
 	// that we're gonna use a lot
 	var clnames = {};
 	var prefix = Utils.isType(this.options.classPrefix, 'string', this.defaults.classPrefix);
-	var suffixes = Utils.isType(this.options.classSuffixes, 'object', this.defaults.classSuffixes);
-	for (var k in suffixes) {
-		if (Object.prototype.hasOwnProperty.call(suffixes, k)) {
-			clnames[k] = prefix + suffixes[k];
+	var aliases = Utils.isType(this.options.classAliases, 'object', this.defaults.classAliases);
+	for (var k in aliases) {
+		if (Object.prototype.hasOwnProperty.call(aliases, k)) {
+			clnames[k] = prefix + aliases[k];
 		}
 	}
 
@@ -118,7 +119,7 @@ function ViewMatrix (selector, o) {
 		}
 
 		// trigger event
-		this.emit('destroyed', this.element, this.children);
+		this.emit('destroy', this.element, this.children);
 
 		// reset vars
 		this.element = null;
@@ -180,7 +181,7 @@ function ViewMatrix (selector, o) {
 		Utils.toggleClassInElement(this.element, clnames.infinite, this.options.infinite);
 
 		// trigger event
-		this.emit('initialized', this.element, this.children);
+		this.emit('initialize', this.element, this.children);
 	};
 
 	/**
@@ -210,7 +211,7 @@ function ViewMatrix (selector, o) {
 		var isNearEnd = index >= upperLimit;
 
 		// trigger before event
-		this.emit('beforeslide', this.current, index, this.total);
+		this.emit('slide:before', this.current, index, this.total);
 
 		// add or remove classes from children
 		for (var i = 0; i < this.children.length; i++) {
@@ -279,6 +280,14 @@ function ViewMatrix (selector, o) {
 		return this.slide(this.current + Utils.isType(inc, 'number', 0));
 	};
 
+
+	this.toggle = function (name, condition) {
+		if (this.element) {
+			Utils.toggleClassInElement(this.element, prefix + name, condition);
+		}
+	};
+
+
 	/**
 	 * Wraps a given "index" to be safe.
 	 *
@@ -302,7 +311,137 @@ function ViewMatrix (selector, o) {
 // expose ViewMatrix class
 module.exports = ViewMatrix;
 
-},{"./utils":4,"emitter":"emitter"}],3:[function(require,module,exports){
+},{"./utils":5,"emitter":"emitter"}],3:[function(require,module,exports){
+var Utils = require('./utils');
+
+/**
+ * Creates a new ViewMatrixAutoplay instance.
+ *
+ * @constructor
+ * @param {ViewMatrix} instance - The ViewMatrix instance.
+ * @param {Object} [o] - Options for the module.
+ */
+function ViewMatrixAutoplay (instance, o) {
+	var self = this;
+
+	/**
+	 * The ViewMatrixAutoplay instance's default values.
+	 * @var {Object}
+	 * @property {Boolean} cancelOnSlide - Tells the module it should cancel the autoplay when a slide is manually changed. Default is "true".
+	 * @property {String} classAlias - Together with the instance's "classPrefix" option, defines the class to toggle when autoplaying is enabled. Default is "autoplaying".
+	 * @property {Number} direction - Direction increment of the navigation. Default is "+1" = "next".
+	 * @property {Boolean} instant - Tells the module it should start autoplaying immediately. Default is "true".
+	 * @property {Number} interval - Seconds it takes to navigate. Default is "2".
+	 */
+	this.defaults = {
+		cancelOnSlide: true,
+		classAlias: 'autoplaying',
+		direction: +1,
+		instant: true,
+		interval: 3
+	};
+
+	/**
+	 * The ViewMatrixAutoplay instance's options.
+	 * @var {Object}
+	 */
+	this.options = Utils.prepareInstanceOptions(this.defaults, o);
+
+	// check if it's a valid instance or give up
+	instance = Utils.giveInstanceOrDie(instance);
+
+	// shortcut variables
+	var interval = null;
+	var cancel = false;
+	var alias = Utils.isType(self.options.classAlias, 'string', false);
+
+	// event handler for when autoplay interval is fired,
+	// basically activates the control variable and changes the slide
+	function handleAutoplay () {
+		cancel = true;
+		instance.inc(self.options.direction);
+	};
+
+	// event handler for when a slide is changed,
+	// if the control variable wasn't set, pauses the autoplay
+	function handleSlideChange () {
+		if (!cancel && self.options.cancelOnSlide !== false) {
+			self.pause();
+		}
+		cancel = false;
+	};
+
+	/**
+	 * Starts the autoplay.
+	 *
+	 * @param {Boolean} emit - Tells the method it should fire an event or not. Default is "true".
+	 */
+	this.play = function (emit) {
+		self.pause(false);
+		interval = setInterval(handleAutoplay, Utils.isType(self.options.interval, 'number', 3) * 1000);
+
+		if (alias !== false) {
+			instance.toggle(alias, true);
+		}
+
+		if (emit !== false) {
+			instance.emit('autoplay:start');
+		}
+	};
+
+	/**
+	 * Stops the autoplay.
+	 *
+	 * @param {Boolean} emit - Tells the method it should fire an event or not. Default is "true".
+	 */
+	this.pause = function (emit) {
+		if (interval == null) {
+			return;
+		}
+
+		clearInterval(interval);
+		interval = null;
+
+		if (self.options.classAlias) {
+			instance.toggle(alias, false);
+		}
+
+		if (emit !== false) {
+			instance.emit('autoplay:pause');
+		}
+	};
+
+	/**
+	 * Binds callbacks to ViewMatrix events.
+	 */
+	this.bindEvents = function () {
+		instance.on('slide', handleSlideChange);
+	};
+
+	/**
+	 * Unbinds callbacks from ViewMatrix events.
+	 */
+	this.unbindEvents = function () {
+		instance.off('slide', handleSlideChange);
+		self.stop(false);
+	};
+
+	// bind to instance events,
+	// so when instance is destroyed/reinitialized
+	// then we'll accompany it
+	instance.on('initialize', self.bindEvents);
+	instance.on('destroy', self.unbindEvents);
+
+	// initialize
+	self.bindEvents();
+	if (self.options.instant === true) {
+		self.play();
+	}
+};
+
+module.exports = ViewMatrixAutoplay;
+
+},{"./utils":5}],4:[function(require,module,exports){
 var Utils = require('./utils');
 
 /**
@@ -342,14 +481,14 @@ function getCoordinateDelta (c1, c2) {
 		x: c1.x - c2.x,
 		y: c1.y - c2.y
 	};
-}
+};
 
 /**
  * Creates a new ViewMatrixTouch instance.
  *
  * @constructor
  * @param {ViewMatrix} instance - The ViewMatrix instance.
- * @param {Object} [o] - Options for the touch instance.
+ * @param {Object} [o] - Options for the module.
  */
 function ViewMatrixTouch (instance, o) {
 	var self = this;
@@ -357,10 +496,16 @@ function ViewMatrixTouch (instance, o) {
 	/**
 	 * The ViewMatrixTouch instance's default values.
 	 * @var {Object}
+	 * @property {String} classAlias - Together with the instance's "classPrefix" option, defines the class to toggle when the element is being touched. Default is "touching".
+	 * @property {Boolean} preventDefault - Tells the module it should call preventDefault() when a touch is started. Default is "false".
+	 * @property {Boolean} swipe - If true, the module detects swipes in the element and navigates automatically. Default is "false".
+	 * @property {Boolean} swipeVertical - If true, the module will handle vertical deltas instead of horizontal. Default is "false".
+	 * @property {Number} swipeTolerance - Amount of pixels the delta must be until a swipe is registered. Default is "30".
 	 */
 	this.defaults = {
+		classAlias: 'touching',
 		preventDefault: false,
-		swipe: true,
+		swipe: false,
 		swipeVertical: false,
 		swipeTolerance: 30
 	};
@@ -369,7 +514,7 @@ function ViewMatrixTouch (instance, o) {
 	 * The ViewMatrixTouch instance's options.
 	 * @var {Object}
 	 */
-	this.options = Utils.mergeObjects(this.defaults, Utils.isType(o, 'object', {}));
+	this.options = Utils.prepareInstanceOptions(this.defaults, o);
 
 	// check if it's a valid instance or give up
 	instance = Utils.giveInstanceOrDie(instance);
@@ -379,12 +524,17 @@ function ViewMatrixTouch (instance, o) {
 	var touchLast = null;
 	var touchDiff = null;
 	var target = null;
+	var alias = Utils.isType(self.options.classAlias, 'string', false);
 
 	// callback that is passed to touchmove events,
 	// so that touch can be cancelled on the other side
 	function cancelTouch (emit) {
+		if (alias !== false) {
+			instance.toggle(alias, false);
+		}
+
 		if (emit !== false) {
-			instance.emit('touchcancel', target, touchLast);
+			instance.emit('touch:cancel', target, touchLast);
 		}
 
 		touchStart = null;
@@ -406,7 +556,11 @@ function ViewMatrixTouch (instance, o) {
 				evt.preventDefault();
 			}
 
-			instance.emit('touchstart', target, coords);
+			if (alias !== false) {
+				instance.toggle(alias, true);
+			}
+
+			instance.emit('touch:start', target, coords);
 		}
 	};
 
@@ -420,7 +574,7 @@ function ViewMatrixTouch (instance, o) {
 		touchLast = getCoordinates(evt);
 		touchDiff = getCoordinateDelta(touchStart, touchLast);
 
-		instance.emit('touchmove', target, touchDiff, cancelTouch);
+		instance.emit('touch:move', target, touchDiff, cancelTouch);
 
 		if (self.options.swipe && handleTouchSwipe(touchDiff)) {
 			cancelTouch(false);
@@ -444,18 +598,18 @@ function ViewMatrixTouch (instance, o) {
 		}
 
 		if (delta > self.options.swipeTolerance) {
-			instance.emit('swipenext', target, touchDiff);
+			instance.emit('swipe:next', target, touchDiff);
 			instance.inc(+1);
 			return true;
 		}
 		else if (delta < -self.options.swipeTolerance) {
-			instance.emit('swipeprev', target, touchDiff);
+			instance.emit('swipe:prev', target, touchDiff);
 			instance.inc(-1);
 			return true;
 		}
 
 		return false;
-	}
+	};
 
 	// event to handle touch end,
 	// just cancels any touching
@@ -464,12 +618,12 @@ function ViewMatrixTouch (instance, o) {
 			return;
 		}
 
-		instance.emit('touchend', target, touchLast);
+		instance.emit('touch:end', target, touchLast);
 		cancelTouch(false);
-	}
+	};
 
 	/**
-	 * Binds touch events to the ViewMatrix element.
+	 * Binds touch events to the document.
 	 */
 	this.bindEvents = function () {
 		cancelTouch(false);
@@ -483,10 +637,10 @@ function ViewMatrixTouch (instance, o) {
 		document.addEventListener('mousedown', handleTouchStart, { passive: false });
 		document.addEventListener('mousemove', handleTouchMove, { passive: false });
 		document.addEventListener('mouseup', handleTouchEnd, { passive: false });
-	}
+	};
 
 	/**
-	 * Unbinds touch events from the ViewMatrix element.
+	 * Unbinds touch events from the document.
 	 */
 	this.unbindEvents = function () {
 		cancelTouch(false);
@@ -500,7 +654,7 @@ function ViewMatrixTouch (instance, o) {
 		document.removeEventListener('mousedown', handleTouchStart, { passive: false });
 		document.removeEventListener('mousemove', handleTouchMove, { passive: false });
 		document.removeEventListener('mouseup', handleTouchEnd, { passive: false });
-	}
+	};
 
 	// bind to instance events,
 	// so when instance is destroyed/reinitialized
@@ -513,7 +667,7 @@ function ViewMatrixTouch (instance, o) {
 };
 
 module.exports = ViewMatrixTouch;
-},{"./utils":4}],4:[function(require,module,exports){
+},{"./utils":5}],5:[function(require,module,exports){
 'use strict';
 
 var Utils = {
@@ -525,6 +679,7 @@ var Utils = {
 	 * @param {String} str - The class to add.
 	 */
 	addClassToElement: function (el, str) {
+		if (!(el instanceof Element)) return;
 		var classes = this.sanitizeString(str).split(' ');
 		var result = el.className.trim();
 		for (var i = 0; i < classes.length; i++) {
@@ -617,12 +772,28 @@ var Utils = {
 	},
 
 	/**
+	 * Merges "defaults" with the given "options" object.
+	 *
+	 * @param {Object} defaults - The instance's default options.
+	 * @param {Object} options - The options that were passed onto the instance's constructor.
+	 * @returns {Object}
+	 */
+	prepareInstanceOptions: function (defaults, options) {
+		return this.mergeObjects(
+			{},
+			this.isType(defaults, 'object', {}),
+			this.isType(options, 'object', {})
+		);
+	},
+
+	/**
 	 * Removes a class from a given HTML element.
 	 *
 	 * @param {Element} el - The element to remove the class from.
 	 * @param {String|Array<String>} str - The class to remove.
 	 */
 	removeClassFromElement: function (el, str) {
+		if (!(el instanceof Element)) return;
 		var classes = !(str instanceof Array)
 			? this.sanitizeString(str).split(' ')
 			: str;
