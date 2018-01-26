@@ -52,11 +52,6 @@ function ViewMatrixTouch (instance, o) {
 	/**
 	 * The ViewMatrixTouch instance's default values.
 	 * @var {Object}
-	 * @property {String} classAlias - Together with the instance's "classPrefix" option, defines the class to toggle when the element is being touched. Default is "touching".
-	 * @property {Boolean} preventDefault - Tells the module it should call preventDefault() when a touch is started. Default is "false".
-	 * @property {Boolean} swipe - If true, the module detects swipes in the element and navigates automatically. Default is "false".
-	 * @property {Boolean} swipeVertical - If true, the module will handle vertical deltas instead of horizontal. Default is "false".
-	 * @property {Number} swipeTolerance - Amount of pixels the delta must be until a swipe is registered. Default is "30".
 	 */
 	this.defaults = {
 		classAlias: 'touching',
@@ -69,6 +64,11 @@ function ViewMatrixTouch (instance, o) {
 	/**
 	 * The ViewMatrixTouch instance's options.
 	 * @var {Object}
+	 * @property {String} classAlias - Together with the instance's "classPrefix" option, defines the class to toggle when the element is being touched. Default is "touching".
+	 * @property {Boolean} preventDefault - Tells the module it should call preventDefault() when a touch is started. Default is "false".
+	 * @property {Boolean} swipe - If true, the module detects swipes in the element and navigates automatically. Default is "false".
+	 * @property {Boolean} swipeVertical - If true, the module will handle vertical deltas instead of horizontal. Default is "false".
+	 * @property {Number} swipeTolerance - Amount of pixels the delta must be until a swipe is registered. Default is "30".
 	 */
 	this.options = Utils.prepareInstanceOptions(this.defaults, o);
 
@@ -78,7 +78,7 @@ function ViewMatrixTouch (instance, o) {
 	// shortcut variables
 	var touchStart = null;
 	var touchLast = null;
-	var touchDiff = null;
+	var touchDelta = null;
 	var target = null;
 	var alias = Utils.isType(self.options.classAlias, 'string', false);
 
@@ -128,38 +128,38 @@ function ViewMatrixTouch (instance, o) {
 		}
 
 		touchLast = getCoordinates(evt);
-		touchDiff = getCoordinateDelta(touchStart, touchLast);
+		touchDelta = getCoordinateDelta(touchStart, touchLast);
 
-		instance.emit('touch:move', target, touchDiff, cancelTouch);
+		instance.emit('touch:move', target, touchDelta, cancelTouch);
 
-		if (self.options.swipe && handleTouchSwipe(touchDiff)) {
+		if (self.options.swipe && handleTouchSwipe(touchDelta)) {
 			cancelTouch(false);
 		}
 	};
 
 	// method to handle touch swipe,
 	// returns true if swipe is applied
-	function handleTouchSwipe (touchDiff) {
-		var xAbs = Math.abs(touchDiff.x);
-		var yAbs = Math.abs(touchDiff.y);
+	function handleTouchSwipe (touchDelta) {
+		var xAbs = Math.abs(touchDelta.x);
+		var yAbs = Math.abs(touchDelta.y);
 		var delta = 0;
 
 		if (xAbs > yAbs && !self.options.swipeVertical) {
 			// swiped horizontally
-			delta = touchDiff.x;
+			delta = touchDelta.x;
 		}
 		else if (xAbs < yAbs && self.options.swipeVertical) {
 			// swiped vertically
-			delta = touchDiff.y;
+			delta = touchDelta.y;
 		}
 
 		if (delta > self.options.swipeTolerance) {
-			instance.emit('swipe:next', target, touchDiff);
+			instance.emit('swipe:next', target, touchDelta);
 			instance.inc(+1);
 			return true;
 		}
 		else if (delta < -self.options.swipeTolerance) {
-			instance.emit('swipe:prev', target, touchDiff);
+			instance.emit('swipe:prev', target, touchDelta);
 			instance.inc(-1);
 			return true;
 		}

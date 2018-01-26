@@ -13,11 +13,6 @@ function ViewMatrixAutoplay (instance, o) {
 	/**
 	 * The ViewMatrixAutoplay instance's default values.
 	 * @var {Object}
-	 * @property {Boolean} cancelOnSlide - Tells the module it should cancel the autoplay when a slide is manually changed. Default is "true".
-	 * @property {String} classAlias - Together with the instance's "classPrefix" option, defines the class to toggle when autoplaying is enabled. Default is "autoplaying".
-	 * @property {Number} direction - Direction increment of the navigation. Default is "+1" = "next".
-	 * @property {Boolean} instant - Tells the module it should start autoplaying immediately. Default is "true".
-	 * @property {Number} interval - Seconds it takes to navigate. Default is "2".
 	 */
 	this.defaults = {
 		cancelOnSlide: true,
@@ -30,6 +25,11 @@ function ViewMatrixAutoplay (instance, o) {
 	/**
 	 * The ViewMatrixAutoplay instance's options.
 	 * @var {Object}
+	 * @property {Boolean} cancelOnSlide - Tells the module it should cancel the autoplay when a slide is manually changed. Default is "true".
+	 * @property {String} classAlias - Together with the instance's "classPrefix" option, defines the class to toggle when autoplaying is enabled. Default is "autoplaying".
+	 * @property {Number} direction - Direction increment of the navigation. Default is "+1" = "next".
+	 * @property {Boolean} instant - Tells the module it should start autoplaying immediately. Default is "true".
+	 * @property {Number} interval - Seconds it takes to navigate. Default is "2".
 	 */
 	this.options = Utils.prepareInstanceOptions(this.defaults, o);
 
