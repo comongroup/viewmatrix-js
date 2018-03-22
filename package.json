@@ -12,7 +12,7 @@
   "bugs": {
     "url": "https://github.com/comongroup/viewmatrix.js/issues"
   },
-  "homepage": "https://comongroup.github.com/viewmatrix.js",
+  "homepage": "https://comongroup.github.io/viewmatrix.js",
   "devDependencies": {
     "grunt": "^1.0.1",
     "grunt-browserify": "^5.2.0",
