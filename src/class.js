@@ -179,7 +179,7 @@ function ViewMatrix (selector, o) {
 
 		// let's optimize
 		var child;
-		var offset;
+		var distance;
 		var isAhead;
 		var isBehind;
 		var isBeyond;
@@ -187,12 +187,10 @@ function ViewMatrix (selector, o) {
 		// wrap index for safety
 		index = this.wrap(index);
 
-		// calc values for infinity
+		// calc adjacent and distance values
 		var adjacentCount = Math.max(1, this.options.adjacentCount);
-		var lowerLimit = adjacentCount;
-		var upperLimit = this.children.length - adjacentCount;
-		var isNearStart = index < adjacentCount;
-		var isNearEnd = index >= upperLimit;
+		var distanceCount = Math.floor((this.children.length - 1) / 2);
+		var indexCount = distanceCount + (this.children.length % 2 == 0 ? 1 : 0);
 
 		// trigger before event
 		this.emit('slide:before', this.current, index, this.total);
@@ -200,7 +198,18 @@ function ViewMatrix (selector, o) {
 		// add or remove classes from children
 		for (var i = 0; i < this.children.length; i++) {
 			child = this.children[i];
-			offset = Math.abs(index - i);
+			distance = i - index;
+
+			if (this.options.infinite) {
+				// if we're looping around in an infinite gallery,
+				// we loop the distance as well
+				if (distance > distanceCount) {
+					distance -= this.children.length;
+				}
+				else if (distance < -distanceCount) {
+					distance += this.children.length;
+				}
+			}
 
 			if (i === index) {
 				// this is the new current element
@@ -211,26 +220,11 @@ function ViewMatrix (selector, o) {
 			else {
 				// this is not a current element,
 				// figure out if it's before or after
-				isAhead = i > index;
-				isBehind = i < index;
-
-				// handling infinity (stones)?
-				// check if the item should be on the opposite side of where it'd normally be
-				if (this.options.infinite) {
-					if (isNearStart && i >= upperLimit) {
-						offset = Math.abs(index - (i - this.children.length));
-						isAhead = false;
-						isBehind = true;
-					}
-					else if (isNearEnd && i < lowerLimit) {
-						offset = Math.abs(index - (i + this.children.length));
-						isAhead = true;
-						isBehind = false;
-					}
-				}
+				isAhead = distance > 0;
+				isBehind = distance < 0;
 
 				// check if it's beyond the adjacent scope
-				isBeyond = offset > adjacentCount;
+				isBeyond = Math.abs(distance) > adjacentCount;
 
 				// remove "current" and toggle other classes
 				Utils.removeClassFromElement(child, clnames.current);
@@ -241,7 +235,7 @@ function ViewMatrix (selector, o) {
 
 			// if we're handling z-index, fix it
 			if (this.options.handleZIndex) {
-				Utils.setElementStyle(child, 'z-index', this.children.length - offset);
+				Utils.setElementStyle(child, 'z-index', indexCount - Math.abs(distance));
 			}
 		}
 

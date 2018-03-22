@@ -34,9 +34,9 @@
 .example-container-css .vm-child.vm-behind.vm-beyond { transform: translateX(-160%) scale(0.6); }
 .example-container-css .vm-child.vm-ahead.vm-beyond { transform: translateX(160%) scale(0.6); }
 
-.example-container-css.vm-infinite .vm-child.vm-beyond {
+/* .example-container-css.vm-infinite .vm-child.vm-beyond {
 	transform: scale(0.6);
-}
+} */
 
 .example-container-css.example-vertical {
 	overflow: hidden;

@@ -1,5 +1,5 @@
 /*
- * viewmatrix.js v0.0.1 (2018-01-25 23:22:55)
+ * viewmatrix.js v0.0.2 (2018-03-22 17:20:35)
  * @author comOn Group
  */
 
@@ -195,7 +195,7 @@ function ViewMatrix (selector, o) {
 
 		// let's optimize
 		var child;
-		var offset;
+		var distance;
 		var isAhead;
 		var isBehind;
 		var isBeyond;
@@ -203,12 +203,10 @@ function ViewMatrix (selector, o) {
 		// wrap index for safety
 		index = this.wrap(index);
 
-		// calc values for infinity
+		// calc adjacent and distance values
 		var adjacentCount = Math.max(1, this.options.adjacentCount);
-		var lowerLimit = adjacentCount;
-		var upperLimit = this.children.length - adjacentCount;
-		var isNearStart = index < adjacentCount;
-		var isNearEnd = index >= upperLimit;
+		var distanceCount = Math.floor((this.children.length - 1) / 2);
+		var indexCount = distanceCount + (this.children.length % 2 == 0 ? 1 : 0);
 
 		// trigger before event
 		this.emit('slide:before', this.current, index, this.total);
@@ -216,7 +214,18 @@ function ViewMatrix (selector, o) {
 		// add or remove classes from children
 		for (var i = 0; i < this.children.length; i++) {
 			child = this.children[i];
-			offset = Math.abs(index - i);
+			distance = i - index;
+
+			if (this.options.infinite) {
+				// if we're looping around in an infinite gallery,
+				// we loop the distance as well
+				if (distance > distanceCount) {
+					distance -= this.children.length;
+				}
+				else if (distance < -distanceCount) {
+					distance += this.children.length;
+				}
+			}
 
 			if (i === index) {
 				// this is the new current element
@@ -227,26 +236,11 @@ function ViewMatrix (selector, o) {
 			else {
 				// this is not a current element,
 				// figure out if it's before or after
-				isAhead = i > index;
-				isBehind = i < index;
-
-				// handling infinity (stones)?
-				// check if the item should be on the opposite side of where it'd normally be
-				if (this.options.infinite) {
-					if (isNearStart && i >= upperLimit) {
-						offset = Math.abs(index - (i - this.children.length));
-						isAhead = false;
-						isBehind = true;
-					}
-					else if (isNearEnd && i < lowerLimit) {
-						offset = Math.abs(index - (i + this.children.length));
-						isAhead = true;
-						isBehind = false;
-					}
-				}
+				isAhead = distance > 0;
+				isBehind = distance < 0;
 
 				// check if it's beyond the adjacent scope
-				isBeyond = offset > adjacentCount;
+				isBeyond = Math.abs(distance) > adjacentCount;
 
 				// remove "current" and toggle other classes
 				Utils.removeClassFromElement(child, clnames.current);
@@ -257,7 +251,7 @@ function ViewMatrix (selector, o) {
 
 			// if we're handling z-index, fix it
 			if (this.options.handleZIndex) {
-				Utils.setElementStyle(child, 'z-index', this.children.length - offset);
+				Utils.setElementStyle(child, 'z-index', indexCount - Math.abs(distance));
 			}
 		}
 
@@ -327,11 +321,6 @@ function ViewMatrixAutoplay (instance, o) {
 	/**
 	 * The ViewMatrixAutoplay instance's default values.
 	 * @var {Object}
-	 * @property {Boolean} cancelOnSlide - Tells the module it should cancel the autoplay when a slide is manually changed. Default is "true".
-	 * @property {String} classAlias - Together with the instance's "classPrefix" option, defines the class to toggle when autoplaying is enabled. Default is "autoplaying".
-	 * @property {Number} direction - Direction increment of the navigation. Default is "+1" = "next".
-	 * @property {Boolean} instant - Tells the module it should start autoplaying immediately. Default is "true".
-	 * @property {Number} interval - Seconds it takes to navigate. Default is "2".
 	 */
 	this.defaults = {
 		cancelOnSlide: true,
@@ -344,6 +333,11 @@ function ViewMatrixAutoplay (instance, o) {
 	/**
 	 * The ViewMatrixAutoplay instance's options.
 	 * @var {Object}
+	 * @property {Boolean} cancelOnSlide - Tells the module it should cancel the autoplay when a slide is manually changed. Default is "true".
+	 * @property {String} classAlias - Together with the instance's "classPrefix" option, defines the class to toggle when autoplaying is enabled. Default is "autoplaying".
+	 * @property {Number} direction - Direction increment of the navigation. Default is "+1" = "next".
+	 * @property {Boolean} instant - Tells the module it should start autoplaying immediately. Default is "true".
+	 * @property {Number} interval - Seconds it takes to navigate. Default is "2".
 	 */
 	this.options = Utils.prepareInstanceOptions(this.defaults, o);
 
@@ -496,11 +490,6 @@ function ViewMatrixTouch (instance, o) {
 	/**
 	 * The ViewMatrixTouch instance's default values.
 	 * @var {Object}
-	 * @property {String} classAlias - Together with the instance's "classPrefix" option, defines the class to toggle when the element is being touched. Default is "touching".
-	 * @property {Boolean} preventDefault - Tells the module it should call preventDefault() when a touch is started. Default is "false".
-	 * @property {Boolean} swipe - If true, the module detects swipes in the element and navigates automatically. Default is "false".
-	 * @property {Boolean} swipeVertical - If true, the module will handle vertical deltas instead of horizontal. Default is "false".
-	 * @property {Number} swipeTolerance - Amount of pixels the delta must be until a swipe is registered. Default is "30".
 	 */
 	this.defaults = {
 		classAlias: 'touching',
@@ -513,6 +502,11 @@ function ViewMatrixTouch (instance, o) {
 	/**
 	 * The ViewMatrixTouch instance's options.
 	 * @var {Object}
+	 * @property {String} classAlias - Together with the instance's "classPrefix" option, defines the class to toggle when the element is being touched. Default is "touching".
+	 * @property {Boolean} preventDefault - Tells the module it should call preventDefault() when a touch is started. Default is "false".
+	 * @property {Boolean} swipe - If true, the module detects swipes in the element and navigates automatically. Default is "false".
+	 * @property {Boolean} swipeVertical - If true, the module will handle vertical deltas instead of horizontal. Default is "false".
+	 * @property {Number} swipeTolerance - Amount of pixels the delta must be until a swipe is registered. Default is "30".
 	 */
 	this.options = Utils.prepareInstanceOptions(this.defaults, o);
 
@@ -522,7 +516,7 @@ function ViewMatrixTouch (instance, o) {
 	// shortcut variables
 	var touchStart = null;
 	var touchLast = null;
-	var touchDiff = null;
+	var touchDelta = null;
 	var target = null;
 	var alias = Utils.isType(self.options.classAlias, 'string', false);
 
@@ -572,38 +566,38 @@ function ViewMatrixTouch (instance, o) {
 		}
 
 		touchLast = getCoordinates(evt);
-		touchDiff = getCoordinateDelta(touchStart, touchLast);
+		touchDelta = getCoordinateDelta(touchStart, touchLast);
 
-		instance.emit('touch:move', target, touchDiff, cancelTouch);
+		instance.emit('touch:move', target, touchDelta, cancelTouch);
 
-		if (self.options.swipe && handleTouchSwipe(touchDiff)) {
+		if (self.options.swipe && handleTouchSwipe(touchDelta)) {
 			cancelTouch(false);
 		}
 	};
 
 	// method to handle touch swipe,
 	// returns true if swipe is applied
-	function handleTouchSwipe (touchDiff) {
-		var xAbs = Math.abs(touchDiff.x);
-		var yAbs = Math.abs(touchDiff.y);
+	function handleTouchSwipe (touchDelta) {
+		var xAbs = Math.abs(touchDelta.x);
+		var yAbs = Math.abs(touchDelta.y);
 		var delta = 0;
 
 		if (xAbs > yAbs && !self.options.swipeVertical) {
 			// swiped horizontally
-			delta = touchDiff.x;
+			delta = touchDelta.x;
 		}
 		else if (xAbs < yAbs && self.options.swipeVertical) {
 			// swiped vertically
-			delta = touchDiff.y;
+			delta = touchDelta.y;
 		}
 
 		if (delta > self.options.swipeTolerance) {
-			instance.emit('swipe:next', target, touchDiff);
+			instance.emit('swipe:next', target, touchDelta);
 			instance.inc(+1);
 			return true;
 		}
 		else if (delta < -self.options.swipeTolerance) {
-			instance.emit('swipe:prev', target, touchDiff);
+			instance.emit('swipe:prev', target, touchDelta);
 			instance.inc(-1);
 			return true;
 		}
