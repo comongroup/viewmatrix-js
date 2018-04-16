@@ -4,12 +4,12 @@ import IViewMatrixClassAliases from './iviewmatrixclassaliases';
  * Options that ViewMatrix supports.
  */
 export default interface IViewMatrixOptions {
-	startingIndex: number;
+	adjacentCount: number;
 	childrenSelector: string;
 	classAliases: IViewMatrixClassAliases;
 	classPrefix: string;
-	adjacentCount: number;
 	handleZIndex: boolean;
 	infinite: boolean;
+	startingIndex: number;
 	wrap: boolean;
 }

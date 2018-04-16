@@ -16,6 +16,7 @@ export default abstract class Emitter {
 	 * @param callback Listener to invoke.
 	 */
 	public on(event: string, callback: EmitterCallback): Emitter {
+		if (typeof callback !== 'function') { return this; }
 		const key = '$' + event;
 		(this.callbacks[key] = this.callbacks[key] || []).push(callback);
 		return this;
@@ -27,6 +28,7 @@ export default abstract class Emitter {
 	 * @param callback Listener to invoke.
 	 */
 	public once(event: string, callback: EmitterCallback): Emitter {
+		if (typeof callback !== 'function') { return this; }
 		function on() {
 			this.off(event, on);
 			callback.apply(this, arguments);

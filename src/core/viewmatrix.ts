@@ -25,7 +25,7 @@ export default class ViewMatrix extends Emitter {
 	/**
 	 * The class' instance defaults.
 	 */
-	private defaults: IViewMatrixOptions = {
+	private readonly defaults: IViewMatrixOptions = {
 		// state init
 		startingIndex: 0,
 		// selectors
@@ -222,7 +222,7 @@ export default class ViewMatrix extends Emitter {
 		}
 
 		// trigger event
-		this.emit('slide', this.currentIndex, index, childrenCount);
+		this.emit('slide:after', this.currentIndex, index, childrenCount);
 
 		// set new index
 		this.currentIndex = index;
@@ -237,6 +237,17 @@ export default class ViewMatrix extends Emitter {
 	 */
 	public inc(increment: number): Element {
 		return this.slide(this.currentIndex + increment);
+	}
+
+	/**
+	 * Toggles a class in the instance's element.
+	 * @param name The class to toggle.
+	 * @param condition Condition to determine if class is added or removed.
+	 */
+	public toggleClass(name: string, condition: boolean) {
+		if (this.element) {
+			toggleClassInElement(this.element, this.options.classPrefix + name, condition);
+		}
 	}
 
 	/**
