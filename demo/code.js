@@ -24,6 +24,8 @@ var example2 = new ViewMatrix('.example-2', {
 bind('.example-2-prev', 'click', function () { example2.inc(-1); });
 bind('.example-2-next', 'click', function () { example2.inc(+1); });
 
+/*
+
 // EXAMPLE 3 - AUTOPLAY
 
 var example3 = new ViewMatrix('.example-3');
@@ -67,3 +69,5 @@ bind('.example-4-next', 'click', function () { example4.inc(+1); });
 // setTimeout(function () { example1.slide(0); }, 1500);
 // setTimeout(function () { example1.slide(3); }, 2000);
 // setTimeout(function () { example1.slide(0); }, 2500);
+
+*/

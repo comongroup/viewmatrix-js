@@ -11,5 +11,19 @@
   },
   "bugs": {
     "url": "https://github.com/comongroup/viewmatrix.js/issues"
-  }
+  },
+  "scripts": {
+    "start": "webpack --watch --config webpack.config.js",
+    "build": "webpack --config webpack.config.js"
+  },
+  "devDependencies": {
+    "clean-webpack-plugin": "^0.1.19",
+    "fork-ts-checker-webpack-plugin": "^0.4.1",
+    "ts-loader": "^4.2.0",
+    "tslint": "^5.9.1",
+    "typescript": "^2.8.1",
+    "webpack": "^4.5.0",
+    "webpack-cli": "^2.0.14"
+  },
+  "dependencies": {}
 }
