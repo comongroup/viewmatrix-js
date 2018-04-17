@@ -37,9 +37,8 @@ example3.on('autoplay:pause', function () {
 	select('.example-3-pause').disabled = true;
 });
 
-var example3autoplay = new ViewMatrix.Autoplay(example3, {
-	direction: +1,
-	interval: 3
+var example3autoplay = new ViewMatrixAutoplay(example3, {
+	interval: 3000
 });
 
 bind('.example-3-prev', 'click', function () { example3.inc(-1); });
@@ -52,10 +51,9 @@ bind('.example-3-pause', 'click', function () { example3autoplay.pause(); });
 var example4 = new ViewMatrix('.example-4', {
 	infinite: true,
 });
-var example4touch = new ViewMatrix.Touch(example4, {
+var example4touch = new ViewMatrixTouchSwipe(example4, {
 	preventDefault: true,
-	swipe: true,
-	swipeVertical: true
+	vertical: true
 });
 
 bind('.example-4-prev', 'click', function () { example4.inc(-1); });

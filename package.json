@@ -2,27 +2,28 @@
   "name": "viewmatrix.js",
   "version": "0.0.3",
   "description": "Javascript media browsing component",
-  "main": "index.js",
+  "author": "comOn Group",
+  "license": "ISC",
+  "homepage": "https://comongroup.github.io/viewmatrix.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/comongroup/viewmatrix.js.git"
   },
-  "author": "comOn Group",
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/comongroup/viewmatrix.js/issues"
   },
-  "homepage": "https://comongroup.github.io/viewmatrix.js",
-  "devDependencies": {
-    "grunt": "^1.0.1",
-    "grunt-browserify": "^5.2.0",
-    "grunt-contrib-clean": "^1.0.0",
-    "grunt-contrib-uglify": "^3.3.0",
-    "grunt-contrib-watch": "^1.0.0",
-    "load-grunt-config": "^0.19.2",
-    "time-grunt": "^1.4.0"
+  "scripts": {
+    "start": "webpack --watch --config webpack.config.js",
+    "build": "webpack --config webpack.config.js"
   },
-  "dependencies": {
-    "component-emitter": "^1.2.1"
-  }
+  "devDependencies": {
+    "clean-webpack-plugin": "^0.1.19",
+    "fork-ts-checker-webpack-plugin": "^0.4.1",
+    "ts-loader": "^4.2.0",
+    "tslint": "^5.9.1",
+    "typescript": "^2.8.1",
+    "webpack": "^4.5.0",
+    "webpack-cli": "^2.0.14"
+  },
+  "dependencies": {}
 }
