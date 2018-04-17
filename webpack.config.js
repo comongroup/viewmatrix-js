@@ -1,4 +1,6 @@
 const path = require('path');
+const webpack = require('webpack');
+const package = require('./package.json');
 
 const resolve = function(dir) {
 	return path.join(__dirname, dir)
@@ -44,6 +46,9 @@ module.exports = {
 		new CleanWebpackPlugin(['public']),
 		new ForkTsCheckerWebpackPlugin({
 			checkSyntacticErrors: true
+		}),
+		new webpack.BannerPlugin({
+			banner: `name: [name]\nversion: ${package.version}\nhash: [hash]`
 		})
 	],
 
