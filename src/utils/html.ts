@@ -1,3 +1,4 @@
+import Point from './point';
 import { sanitize } from './string';
 
 /**
@@ -26,6 +27,17 @@ export function findChildrenInElement(el: HTMLElement, selector?: string): HTMLE
 	return typeof selector === 'string'
 		? [].slice.call(el.querySelectorAll(':scope > ' + selector))
 		: el.children;
+}
+
+/**
+ * Checks if the given `coords` are contained within a `target`.
+ * @param target The target to check.
+ * @param coords The coordinates to check if they're inside the Target.
+ */
+export function inElementBounds(target: HTMLElement, coords: Point) {
+	return target &&
+		coords.x >= target.offsetLeft && coords.x <= target.offsetLeft + target.offsetWidth &&
+		coords.y >= target.offsetTop && coords.y <= target.offsetTop + target.offsetHeight;
 }
 
 /**

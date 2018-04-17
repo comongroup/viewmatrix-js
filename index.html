@@ -1,20 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
 	<title>viewmatrix.js</title>
+	<meta name="title" value="viewmatrix.js" />
+	<meta name="description" value="A lightweight, unopinionated library for creating carousels." />
+	<meta name="keywords" value="viewmatrix, gallery, carousel, javascript, lightweight, unopinionated, css, library" />
+
 </head>
 <body>
 
 	<div class="overflower">
 		<div class="container">
 
-			<h1>viewmatrix.js</h1>
+			<header>
+				<h1>viewmatrix.js</h1>
+				<p>
+					viewmatrix.js is a lightweight, unopinionated library for creating carousels.
+				</p>
+				<p>
+					<b>Still in development,</b> but you're welcome to test it and <a href="https://github.com/comongroup/viewmatrix.js/issues">give feedback!</a>
+				</p>
+				<nav>
+					<a href="#examples">Examples</a>
+					<a href="https://github.com/comongroup/viewmatrix.js">GitHub Repo</a>
+				</nav>
+			</header>
+
+			<hr />
+
+			<h2 id="examples">Examples</h2>
 
 			<div class="example">
-				<h2>Simple gallery</h2>
+				<h3 id="simplegallery">Simple gallery</h3>
 				<p>
 					Basic gallery, with default options and no extra modules.
 				</p>
@@ -38,7 +60,7 @@ var example1 = new <b>ViewMatrix</b>('.example-1');</pre>
 			</div>
 
 			<div class="example">
-				<h2>Infinite carousel</h2>
+				<h3 id="infinitecarousel">Infinite carousel</h3>
 				<p>
 					A carousel that wraps around itself when enough elements exist.
 				</p>
@@ -65,7 +87,7 @@ var example2 = new <b>ViewMatrix</b>('.example-2', {
 			</div>
 
 			<div class="example">
-				<h2>Autoplaying gallery</h2>
+				<h3 id="autoplayinggallery">Autoplaying gallery</h3>
 				<p>
 					A gallery that changes slides over time, until manually interacted with.
 				</p>
@@ -90,10 +112,10 @@ var example3autoplay = new <b>ViewMatrixAutoplay</b>(example3, {
 			</div>
 
 			<div class="example">
-				<h2>Vertical carousel "window", with swipe</h2>
+				<h3 id="verticalcarouselwithswipe">Vertical carousel "window", with swipe</h3>
 				<p>
 					Self-contained carousel, with CSS styles overriden to make it look vertical,
-					and with "quick swipe" capabilities using the <code>Touch</code> module.
+					and with "quick swipe" capabilities using the <code>TouchSwipe</code> module.
 				</p>
 				<p>
 					<code>infinite</code> is enabled to make sure the slides are put at the right place when navigating in the carousel's edges.
@@ -103,10 +125,9 @@ var example3autoplay = new <b>ViewMatrixAutoplay</b>(example3, {
 var example4 = new <b>ViewMatrix</b>('.example-4', {
 	infinite: true
 });
-var example4touch = new <b>ViewMatrix.Touch</b>(example4, {
+var example4touch = new <b>ViewMatrixTouchSwipe</b>(example4, {
 	preventDefault: true,
-	swipe: true,
-	swipeVertical: true
+	vertical: true
 });</pre>
 				<div class="example-container-css example-vertical example-4">
 					<div><img src="demo/images/1.jpg" /><span>1</span></div>

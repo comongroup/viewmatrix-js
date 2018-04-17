@@ -1,39 +1,11 @@
 import ViewMatrixPlugin from '../core/viewmatrixplugin';
+import { inElementBounds } from '../utils/html';
 import Point from '../utils/point';
-
-/**
- * Checks if the given `coords` are contained within a `target`.
- * @param target The target to check.
- * @param coords The coordinates to check if they're inside the Target.
- */
-function inTargetBounds(target: HTMLElement, coords: Point) {
-	return target &&
-		coords.x >= target.offsetLeft && coords.x <= target.offsetLeft + target.offsetWidth &&
-		coords.y >= target.offsetTop && coords.y <= target.offsetTop + target.offsetHeight;
-}
-
-/**
- * Returns a Point object from an event's coordinates.
- * If the event has any touches, it returns the first touch's coordinates.
- * @param event The event to extract the coordinates from.
- */
-function getCoordinates(event: MouseEvent | TouchEvent): Point {
-	const point = new Point();
-	if (event instanceof TouchEvent && event.touches) {
-		point.x = event.touches[0].pageX;
-		point.y = event.touches[0].pageY;
-	}
-	else if (event instanceof MouseEvent) {
-		point.x = event.pageX;
-		point.y = event.pageY;
-	}
-	return point;
-}
 
 /**
  * Options that the ViewMatrix Touch plugin supports.
  */
-export interface IViewMatrixTouchOptions {
+export interface IViewMatrixTouchSwipeOptions {
 	/**
 	 * Together with the instance's `classPrefix` option, defines the class to toggle when the element is being touched. Default is `touching`.
 	 */
@@ -43,20 +15,16 @@ export interface IViewMatrixTouchOptions {
 	 */
 	preventDefault: boolean;
 	/**
-	 * If true, the plugin detects swipes in the element and navigates automatically. Default is `false`.
-	 */
-	swipe: boolean;
-	/**
-	 * - If true, the plugin will handle vertical deltas instead of horizontal. Default is `false`.
-	 */
-	swipeVertical: boolean;
-	/**
 	 * Amount of pixels the delta must be until a swipe is registered. Default is `30`.
 	 */
-	swipeTolerance: number;
+	tolerance: number;
+	/**
+	 * If true, the plugin will handle vertical deltas instead of horizontal. Default is `false`.
+	 */
+	vertical: boolean;
 }
 
-export default class ViewMatrixTouch extends ViewMatrixPlugin<IViewMatrixTouchOptions> {
+export default class ViewMatrixTouchSwipe extends ViewMatrixPlugin<IViewMatrixTouchSwipeOptions> {
 
 	/**
 	 * The ViewMatrixAutoplay instance's default values.
@@ -64,9 +32,8 @@ export default class ViewMatrixTouch extends ViewMatrixPlugin<IViewMatrixTouchOp
 	protected readonly defaults = {
 		classAlias: 'touching',
 		preventDefault: false,
-		swipe: false,
-		swipeVertical: false,
-		swipeTolerance: 30
+		tolerance: 30,
+		vertical: false
 	};
 
 	/**
@@ -144,8 +111,8 @@ export default class ViewMatrixTouch extends ViewMatrixPlugin<IViewMatrixTouchOp
 	 * @param event The event to extract the coordinates from.
 	 */
 	private handleTouchStart = (event: MouseEvent | TouchEvent) => {
-		const coords = getCoordinates(event);
-		if (!this.touchStart && inTargetBounds(this.instance.element, coords)) {
+		const coords = Point.getFromEvent(event);
+		if (!this.touchStart && inElementBounds(this.instance.element, coords)) {
 			this.touchStart = coords;
 			this.touchLast = coords;
 			this.target = this.instance.element;
@@ -165,42 +132,33 @@ export default class ViewMatrixTouch extends ViewMatrixPlugin<IViewMatrixTouchOp
 	 */
 	private handleTouchMove = (event: MouseEvent | TouchEvent) => {
 		if (!this.touchStart) { return; }
-		this.touchLast = getCoordinates(event);
+		this.touchLast = Point.getFromEvent(event);
 		this.touchDelta = this.touchStart.clone().sub(this.touchLast);
 		this.instance.emit('touch:move', this.target, this.touchDelta, this.cancelTouch);
-		if (this.options.swipe && this.handleTouchSwipe(this.touchDelta)) {
+
+		const xAbs = Math.abs(this.touchDelta.x);
+		const yAbs = Math.abs(this.touchDelta.y);
+		let delta = 0;
+
+		if (xAbs > yAbs && !this.options.vertical) {
+			// swiped horizontally
+			delta = this.touchDelta.x;
+		}
+		else if (xAbs < yAbs && this.options.vertical) {
+			// swiped vertically
+			delta = this.touchDelta.y;
+		}
+
+		if (delta > this.options.tolerance) {
+			this.instance.emit('swipe:next', this.target, this.touchDelta);
+			this.instance.inc(+1);
 			this.cancelTouch(false);
 		}
-	}
-
-	/**
-	 * Handles swiping in the element.
-	 * Returns true if a swipe is applied and touch needs to be cancelled.
-	 * @param touchDelta Touch delta needed to figure out if swipe should be applied.
-	 */
-	private handleTouchSwipe(touchDelta: Point): boolean {
-		const xAbs = Math.abs(touchDelta.x);
-		const yAbs = Math.abs(touchDelta.y);
-		let delta = 0;
-		if (xAbs > yAbs && !this.options.swipeVertical) {
-			// swiped horizontally
-			delta = touchDelta.x;
-		}
-		else if (xAbs < yAbs && this.options.swipeVertical) {
-			// swiped vertically
-			delta = touchDelta.y;
-		}
-		if (delta > this.options.swipeTolerance) {
-			this.instance.emit('swipe:next', this.target, touchDelta);
-			this.instance.inc(+1);
-			return true;
-		}
-		else if (delta < -this.options.swipeTolerance) {
-			this.instance.emit('swipe:prev', this.target, touchDelta);
+		else if (delta < -this.options.tolerance) {
+			this.instance.emit('swipe:prev', this.target, this.touchDelta);
 			this.instance.inc(-1);
-			return true;
+			this.cancelTouch(false);
 		}
-		return false;
 	}
 
 	/**

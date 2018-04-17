@@ -51,10 +51,9 @@ bind('.example-3-pause', 'click', function () { example3autoplay.pause(); });
 var example4 = new ViewMatrix('.example-4', {
 	infinite: true,
 });
-var example4touch = new ViewMatrixTouch(example4, {
+var example4touch = new ViewMatrixTouchSwipe(example4, {
 	preventDefault: true,
-	swipe: true,
-	swipeVertical: true
+	vertical: true
 });
 
 bind('.example-4-prev', 'click', function () { example4.inc(-1); });
