@@ -5,8 +5,8 @@ import { sanitize } from './string';
  * @param el The element to add the class to.
  * @param str The class to add.
  */
-export function addClassToElement(el: any, str: any): void {
-	if (!(el instanceof Element)) { return; }
+export function addClassToElement(el: HTMLElement, str: string): void {
+	if (!(el instanceof HTMLElement)) { return; }
 	const classes = sanitize(str).split(' ');
 	let result = el.className.trim();
 	for (const c of classes) {
@@ -22,7 +22,7 @@ export function addClassToElement(el: any, str: any): void {
  * @param el The element to return children from.
  * @param selector Query selector to filter children.
  */
-export function findChildrenInElement(el: Element, selector?: string): Element[] {
+export function findChildrenInElement(el: HTMLElement, selector?: string): HTMLElement[] {
 	return typeof selector === 'string'
 		? [].slice.call(el.querySelectorAll(':scope > ' + selector))
 		: el.children;
@@ -33,8 +33,8 @@ export function findChildrenInElement(el: Element, selector?: string): Element[]
  * @param el The element to remove the class from.
  * @param str The class to remove.
  */
-export function removeClassFromElement(el: Element, str: string | string[]): void {
-	if (!(el instanceof Element)) { return; }
+export function removeClassFromElement(el: HTMLElement, str: string | string[]): void {
+	if (!(el instanceof HTMLElement)) { return; }
 	const classes = !(str instanceof Array)
 		? sanitize(str).split(' ')
 		: str;
@@ -57,7 +57,7 @@ export function removeClassFromElement(el: Element, str: string | string[]): voi
  * @param name The name of the style to add.
  * @param value The value for the style. A value of "null" will erase the style.
  */
-export function setElementStyle(el: Element, name: string, value: any): string {
+export function setElementStyle(el: HTMLElement, name: string, value: any): string {
 	let style = sanitize(el.getAttribute('style') || '');
 	if (value == null || style.indexOf(name + ':') !== -1) {
 		style = style.replace(new RegExp(name + ':[^;]+;', 'g'), '');
@@ -82,7 +82,7 @@ export function setElementStyle(el: Element, name: string, value: any): string {
  * @param str The class to toggle.
  * @param condition Condition to determine if class is added or removed.
  */
-export function toggleClassInElement(el: Element, str: string, condition: boolean): boolean {
+export function toggleClassInElement(el: HTMLElement, str: string, condition: boolean): boolean {
 	if (condition) {
 		addClassToElement(el, str);
 	}

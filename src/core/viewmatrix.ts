@@ -10,7 +10,7 @@ export default class ViewMatrix extends Emitter {
 	/**
 	 * The instance's target element.
 	 */
-	public element: Element;
+	public element: HTMLElement;
 
 	/**
 	 * The instance's options.
@@ -20,7 +20,7 @@ export default class ViewMatrix extends Emitter {
 	/**
 	 * The ViewMatrix instance's children.
 	 */
-	private children: Element[] = null;
+	private children: HTMLElement[] = null;
 
 	/**
 	 * The class' instance defaults.
@@ -63,7 +63,7 @@ export default class ViewMatrix extends Emitter {
 	 * @param selector The target selector or element for the instance.
 	 * @param options Options for the instance.
 	 */
-	constructor(parentSelector: string | Element, options?: IViewMatrixOptions) {
+	constructor(parentSelector: string | HTMLElement, options?: IViewMatrixOptions) {
 		super();
 		this.options = merge(({} as IViewMatrixOptions), this.defaults, options);
 		this.refresh(parentSelector, this.options.childrenSelector);
@@ -108,7 +108,7 @@ export default class ViewMatrix extends Emitter {
 	 * @param parentSelector The query selector to find the element.
 	 * @param childrenSelector An optional query selector to filter children.
 	 */
-	public refresh(parentSelector: string | Element, childrenSelector?: string) {
+	public refresh(parentSelector: string | HTMLElement, childrenSelector?: string): void {
 		// destroy first
 		this.destroy();
 
@@ -120,7 +120,7 @@ export default class ViewMatrix extends Emitter {
 		if (typeof parentSelector === 'string') {
 			this.element = document.querySelector(parentSelector) || null;
 		}
-		else if (parentSelector instanceof Element) {
+		else if (parentSelector instanceof HTMLElement) {
 			this.element = parentSelector;
 		}
 
@@ -158,7 +158,7 @@ export default class ViewMatrix extends Emitter {
 	 * Changes the ViewMatrix's current slide.
 	 * @param index Slide to change to.
 	 */
-	public slide(index: number): Element {
+	public slide(index: number): HTMLElement {
 		if (!this.children || this.children.length === 0) { return null; }
 
 		// wrap index for safety
@@ -235,7 +235,7 @@ export default class ViewMatrix extends Emitter {
 	 * Increments the ViewMatrix's current slide.
 	 * @param inc Value to add to the current index.
 	 */
-	public inc(increment: number): Element {
+	public inc(increment: number): HTMLElement {
 		return this.slide(this.currentIndex + increment);
 	}
 
@@ -244,7 +244,7 @@ export default class ViewMatrix extends Emitter {
 	 * @param name The class to toggle.
 	 * @param condition Condition to determine if class is added or removed.
 	 */
-	public toggleClass(name: string, condition: boolean) {
+	public toggleClass(name: string, condition: boolean): void {
 		if (this.element) {
 			toggleClassInElement(this.element, this.options.classPrefix + name, condition);
 		}

@@ -46,14 +46,12 @@ bind('.example-3-next', 'click', function () { example3.inc(+1); });
 bind('.example-3-play', 'click', function () { example3autoplay.play(); });
 bind('.example-3-pause', 'click', function () { example3autoplay.pause(); });
 
-/*
-
 // EXAMPLE 4 - SWIPE
 
 var example4 = new ViewMatrix('.example-4', {
 	infinite: true,
 });
-var example4touch = new ViewMatrix.Touch(example4, {
+var example4touch = new ViewMatrixTouch(example4, {
 	preventDefault: true,
 	swipe: true,
 	swipeVertical: true
@@ -68,5 +66,3 @@ bind('.example-4-next', 'click', function () { example4.inc(+1); });
 // setTimeout(function () { example1.slide(0); }, 1500);
 // setTimeout(function () { example1.slide(3); }, 2000);
 // setTimeout(function () { example1.slide(0); }, 2500);
-
-*/

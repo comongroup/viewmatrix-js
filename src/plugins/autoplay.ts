@@ -66,8 +66,7 @@ export default class ViewMatrixAutoplay extends ViewMatrixPlugin<IViewMatrixAuto
 
 	/**
 	 * Stops the autoplay.
-	 *
-	 * @param {Boolean} emit - Tells the method it should fire an event or not. Default is "true".
+	 * @param emit Tells the method it should fire an event or not. Default is `true`.
 	 */
 	public pause(emit?: boolean) {
 		if (this.intervalId === 0) {
@@ -88,7 +87,6 @@ export default class ViewMatrixAutoplay extends ViewMatrixPlugin<IViewMatrixAuto
 	 */
 	protected onInit(): void {
 		this.instance.on('slide:after', this.handleSlideChange);
-		console.log(this.options, this.defaults);
 		if (this.options.instant === true) {
 			this.play();
 		}
