@@ -1,35 +1,41 @@
 import ViewMatrixPlugin from '../core/viewmatrixplugin';
 import { inElementBounds } from '../utils/html';
+import { merge } from '../utils/objects';
 import Point from '../utils/point';
 
 /**
  * Options that the ViewMatrix Touch plugin supports.
  */
-export interface IViewMatrixTouchSwipeOptions {
+export interface ITouchSwipePluginOptions {
 	/**
 	 * Together with the instance's `classPrefix` option, defines the class to toggle when the element is being touched. Default is `touching`.
 	 */
-	classAlias: string;
+	classAlias?: string;
 	/**
 	 * Tells the plugin it should call preventDefault() when a touch is started. Default is `false`.
 	 */
-	preventDefault: boolean;
+	preventDefault?: boolean;
 	/**
 	 * Amount of pixels the delta must be until a swipe is registered. Default is `30`.
 	 */
-	tolerance: number;
+	tolerance?: number;
 	/**
 	 * If true, the plugin will handle vertical deltas instead of horizontal. Default is `false`.
 	 */
-	vertical: boolean;
+	vertical?: boolean;
 }
 
-export default class ViewMatrixTouchSwipe extends ViewMatrixPlugin<IViewMatrixTouchSwipeOptions> {
+export default class TouchSwipePlugin extends ViewMatrixPlugin {
 
 	/**
-	 * The ViewMatrixAutoplay instance's default values.
+	 * The instance's options.
 	 */
-	protected readonly defaults = {
+	public readonly options: ITouchSwipePluginOptions = {};
+
+	/**
+	 * The instance's default values.
+	 */
+	private readonly defaults: ITouchSwipePluginOptions = {
 		classAlias: 'touching',
 		preventDefault: false,
 		tolerance: 30,
@@ -57,9 +63,18 @@ export default class ViewMatrixTouchSwipe extends ViewMatrixPlugin<IViewMatrixTo
 	private target?: HTMLElement = undefined;
 
 	/**
+	 * Initializes a new TouchSwipePlugin instance.
+	 * @param options Options for the plugin.
+	 */
+	public constructor(options?: ITouchSwipePluginOptions) {
+		super();
+		merge(this.options, this.defaults, options);
+	}
+
+	/**
 	 * Method called when the instance is initialized.
 	 */
-	protected onInit(): void {
+	public onInit(): void {
 		this.cancelTouch(false);
 
 		// add touch events
@@ -76,7 +91,7 @@ export default class ViewMatrixTouchSwipe extends ViewMatrixPlugin<IViewMatrixTo
 	/**
 	 * Method called when the instance is destroyed.
 	 */
-	protected onDestroy(): void {
+	public onDestroy(): void {
 		this.cancelTouch(false);
 
 		// cancel touch events

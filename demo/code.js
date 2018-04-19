@@ -26,7 +26,13 @@ bind('.example-2-next', 'click', function () { example2.inc(+1); });
 
 // EXAMPLE 3 - AUTOPLAY
 
-var example3 = new ViewMatrix('.example-3');
+var example3 = new ViewMatrix('.example-3', {}, function (p) {
+	return [
+		new p.AutoplayPlugin({
+			interval: 3000
+		})
+	]
+});
 
 example3.on('autoplay:start', function () {
 	select('.example-3-play').disabled = true;
@@ -35,10 +41,6 @@ example3.on('autoplay:start', function () {
 example3.on('autoplay:pause', function () {
 	select('.example-3-play').disabled = false;
 	select('.example-3-pause').disabled = true;
-});
-
-var example3autoplay = new ViewMatrixAutoplay(example3, {
-	interval: 3000
 });
 
 bind('.example-3-prev', 'click', function () { example3.inc(-1); });
@@ -50,10 +52,13 @@ bind('.example-3-pause', 'click', function () { example3autoplay.pause(); });
 
 var example4 = new ViewMatrix('.example-4', {
 	infinite: true,
-});
-var example4touch = new ViewMatrixTouchSwipe(example4, {
-	preventDefault: true,
-	vertical: true
+}, function (p) {
+	return [
+		new p.TouchSwipePlugin({
+			preventDefault: true,
+			vertical: true
+		})
+	];
 });
 
 bind('.example-4-prev', 'click', function () { example4.inc(-1); });

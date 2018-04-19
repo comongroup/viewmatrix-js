@@ -1,9 +1,18 @@
+import AutoplayPlugin from '../plugins/autoplay';
+import TouchSwipePlugin from '../plugins/touchswipe';
 import Emitter from '../utils/emitter';
 import { addClassToElement, findChildrenInElement, removeClassFromElement, setElementStyle, toggleClassInElement } from '../utils/html';
 import { clamp, wrap } from '../utils/math';
 import { merge } from '../utils/objects';
 import IViewMatrixClassAliases from './iviewmatrixclassaliases';
 import IViewMatrixOptions from './iviewmatrixoptions';
+import ViewMatrixPlugin from './viewmatrixplugin';
+
+interface IPluginDictionary {
+	[id: string]: typeof ViewMatrixPlugin;
+}
+
+type PluginConstructor = (p: IPluginDictionary) => ViewMatrixPlugin[];
 
 export default class ViewMatrix extends Emitter {
 
@@ -21,6 +30,11 @@ export default class ViewMatrix extends Emitter {
 	 * The ViewMatrix instance's children.
 	 */
 	private children: HTMLElement[] = null;
+
+	/**
+	 * List of ViewMatrixPlugin instances associated with the instance.
+	 */
+	private plugins: ViewMatrixPlugin[] = [];
 
 	/**
 	 * The class' instance defaults.
@@ -63,44 +77,31 @@ export default class ViewMatrix extends Emitter {
 	 * @param selector The target selector or element for the instance.
 	 * @param options Options for the instance.
 	 */
-	constructor(parentSelector: string | HTMLElement, options?: IViewMatrixOptions) {
+	constructor(
+		parentSelector: string | HTMLElement,
+		options?: IViewMatrixOptions,
+		plugins?: ViewMatrixPlugin[] | PluginConstructor
+	) {
 		super();
-		this.options = merge(({} as IViewMatrixOptions), this.defaults, options);
-		this.refresh(parentSelector, this.options.childrenSelector);
-	}
 
-	/**
-	 * Destroys the ViewMatrix instance.
-	 */
-	public destroy(): void {
-		// reset current element
-		if (this.element) {
-			removeClassFromElement(this.element, [
-				this.classAliases.element,
-				this.classAliases.infinite
-			]);
-		}
+		// get options
+		this.options = merge({}, this.defaults, options);
 
-		// reset current children
-		if (this.children && this.children.length > 0) {
-			for (const child of this.children) {
-				removeClassFromElement(child, [
-					this.classAliases.child,
-					this.classAliases.current,
-					this.classAliases.beyond,
-					this.classAliases.behind,
-					this.classAliases.ahead
-				] );
-				setElementStyle(child, 'z-index', null);
+		// load plugins
+		if (plugins) {
+			if (plugins instanceof Array) {
+				this.plugins = Array.prototype.slice.call(plugins, 1);
+			}
+			else if (typeof plugins === 'function') {
+				this.plugins = plugins({
+					AutoplayPlugin,
+					TouchSwipePlugin
+				});
 			}
 		}
 
-		// trigger event
-		this.emit('destroy', this.element, this.children);
-
-		// reset vars
-		this.element = null;
-		this.children = null;
+		// initialize
+		this.initialize(parentSelector, this.options.childrenSelector);
 	}
 
 	/**
@@ -108,7 +109,7 @@ export default class ViewMatrix extends Emitter {
 	 * @param parentSelector The query selector to find the element.
 	 * @param childrenSelector An optional query selector to filter children.
 	 */
-	public refresh(parentSelector: string | HTMLElement, childrenSelector?: string): void {
+	public initialize(parentSelector: string | HTMLElement, childrenSelector?: string): void {
 		// destroy first
 		this.destroy();
 
@@ -143,15 +144,55 @@ export default class ViewMatrix extends Emitter {
 			addClassToElement(child, this.classAliases.child);
 		}
 
-		// refresh slides
-		this.slide(this.currentIndex);
-
 		// add classes to the element
 		addClassToElement(this.element, this.classAliases.element);
 		toggleClassInElement(this.element, this.classAliases.infinite, this.options.infinite);
 
+		// initialize plugins
+		this.initializePlugins();
+
+		// refresh slides
+		this.slide(this.currentIndex);
+
 		// trigger event
 		this.emit('init', this.element, this.children);
+	}
+
+	/**
+	 * Destroys the ViewMatrix instance.
+	 */
+	public destroy(): void {
+		// reset all plugins
+		this.destroyPlugins();
+
+		// reset current element
+		if (this.element) {
+			removeClassFromElement(this.element, [
+				this.classAliases.element,
+				this.classAliases.infinite
+			]);
+		}
+
+		// reset current children
+		if (this.children && this.children.length > 0) {
+			for (const child of this.children) {
+				removeClassFromElement(child, [
+					this.classAliases.child,
+					this.classAliases.current,
+					this.classAliases.beyond,
+					this.classAliases.behind,
+					this.classAliases.ahead
+				] );
+				setElementStyle(child, 'z-index', null);
+			}
+		}
+
+		// trigger event
+		this.emit('destroy', this.element, this.children);
+
+		// reset vars
+		this.element = null;
+		this.children = null;
 	}
 
 	/**
@@ -272,6 +313,34 @@ export default class ViewMatrix extends Emitter {
 		return this.options.wrap
 			? wrap(index, 0, max)
 			: clamp(index, 0, max);
+	}
+
+	/**
+	 * Invokes the `onInit` method on all registered plugins.
+	 */
+	private initializePlugins(): void {
+		for (const p of this.plugins) {
+			if (p) {
+				p.instance = this;
+				if (typeof p.onInit === 'function') {
+					p.onInit();
+				}
+			}
+		}
+	}
+
+	/**
+	 * Invokes the `onDestroy` method on all registered plugins.
+	 */
+	private destroyPlugins(): void {
+		for (const p of this.plugins) {
+			if (p && p.instance) {
+				if (typeof p.onDestroy === 'function') {
+					p.onDestroy();
+				}
+				p.instance = null;
+			}
+		}
 	}
 
 }
