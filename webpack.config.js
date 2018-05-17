@@ -32,9 +32,7 @@ module.exports = {
 				use: {
 					loader: 'ts-loader',
 					options: {
-						configFile: resolve('tsconfig.json'),
-						happyPackMode: true,
-						transpileOnly: true
+						configFile: resolve('tsconfig.json')
 					}
 				}
 			}
@@ -43,10 +41,7 @@ module.exports = {
 	},
 
 	plugins: [
-		new CleanWebpackPlugin(['public']),
-		new ForkTsCheckerWebpackPlugin({
-			checkSyntacticErrors: true
-		}),
+		new CleanWebpackPlugin(['bin']),
 		new webpack.BannerPlugin({
 			banner: `name: [name]\nversion: ${package.version}\nhash: [hash]`
 		})
