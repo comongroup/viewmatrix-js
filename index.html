@@ -92,9 +92,13 @@ var example2 = new <b>ViewMatrix</b>('.example-2', {
 					A gallery that changes slides over time, until manually interacted with.
 				</p>
 				<pre>
-var example3 = new <b>ViewMatrix</b>('.example-3');
-var example3autoplay = new <b>ViewMatrixAutoplay</b>(example3, {
-	interval: 3000
+var example3autoplay;
+var example3 = new <b>ViewMatrix</b>('.example-3', {}, function(p) {
+	return [
+		example3autoplay = new <b>p.AutoplayPlugin</b>({
+			interval: 3000
+		})
+	];
 });</pre>
 				<div class="example-container-css example-3">
 					<div><img src="demo/images/1.jpg" /><span>1</span></div>
@@ -122,12 +126,16 @@ var example3autoplay = new <b>ViewMatrixAutoplay</b>(example3, {
 					<code>preventDefault</code> also makes sure the window doesn't move around while swiping on mobile.
 				</p>
 				<pre>
+var example4touch;
 var example4 = new <b>ViewMatrix</b>('.example-4', {
 	infinite: true
-});
-var example4touch = new <b>ViewMatrixTouchSwipe</b>(example4, {
-	preventDefault: true,
-	vertical: true
+}, function(p) {
+	return [
+		example4touch = new <b>p.TouchSwipePlugin</b>(example4, {
+			preventDefault: true,
+			vertical: true
+		})
+	];
 });</pre>
 				<div class="example-container-css example-vertical example-4">
 					<div><img src="demo/images/1.jpg" /><span>1</span></div>

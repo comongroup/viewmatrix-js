@@ -1,37 +1,43 @@
 import ViewMatrixPlugin from '../core/viewmatrixplugin';
+import { merge } from '../utils/objects';
 
 /**
  * Options that the ViewMatrix Autoplay plugin supports.
  */
-export interface IViewMatrixAutoplayOptions {
+export interface IAutoplayPluginOptions {
 	/**
 	 * Tells the module it should cancel the autoplay when a slide is manually changed. Default is `true`.
 	 */
-	cancelOnSlide: boolean;
+	cancelOnSlide?: boolean;
 	/**
 	 * Together with the instance's `classPrefix` option, defines the class to toggle when autoplaying is enabled. Default is `autoplaying`.
 	 */
-	classAlias: string;
+	classAlias?: string;
 	/**
 	 * Direction increment of the navigation. Default is `+1` = `next`.
 	 */
-	direction: number;
+	direction?: number;
 	/**
 	 * Tells the module it should start autoplaying immediately. Default is `true`.
 	 */
-	instant: boolean;
+	instant?: boolean;
 	/**
 	 * Milliseconds it takes to navigate. Default is `3000`.
 	 */
-	interval: number;
+	interval?: number;
 }
 
-export default class ViewMatrixAutoplay extends ViewMatrixPlugin<IViewMatrixAutoplayOptions> {
+export default class AutoplayPlugin extends ViewMatrixPlugin {
 
 	/**
-	 * The ViewMatrixAutoplay instance's default values.
+	 * The instance's options.
 	 */
-	protected readonly defaults = {
+	public readonly options: IAutoplayPluginOptions = {};
+
+	/**
+	 * The instance's default values.
+	 */
+	protected readonly defaults: IAutoplayPluginOptions = {
 		cancelOnSlide: true,
 		classAlias: 'autoplaying',
 		direction: +1,
@@ -42,12 +48,39 @@ export default class ViewMatrixAutoplay extends ViewMatrixPlugin<IViewMatrixAuto
 	/**
 	 * Determines if autoplay should be cancelled when handling a slide change.
 	 */
-	private cancelAutoplay: boolean = true;
+	private cancelAutoplay: boolean = false;
 
 	/**
 	 * ID of the setInterval instance.
 	 */
 	private intervalId: number = 0;
+
+	/**
+	 * Initializes a new TouchSwipePlugin instance.
+	 * @param options Options for the plugin.
+	 */
+	public constructor(options?: IAutoplayPluginOptions) {
+		super();
+		merge(this.options, this.defaults, options);
+	}
+
+	/**
+	 * Method called when the instance is initialized.
+	 */
+	public onInit(): void {
+		this.instance.on('slide:after', this.handleSlideChange);
+		if (this.options.instant === true) {
+			this.play();
+		}
+	}
+
+	/**
+	 * Method called when the instance is destroyed.
+	 */
+	public onDestroy(): void {
+		this.instance.off('slide:after', this.handleSlideChange);
+		this.pause(false);
+	}
 
 	/**
 	 * Starts the autoplay.
@@ -80,24 +113,6 @@ export default class ViewMatrixAutoplay extends ViewMatrixPlugin<IViewMatrixAuto
 		if (emit !== false) {
 			this.instance.emit('autoplay:pause');
 		}
-	}
-
-	/**
-	 * Method called when the instance is initialized.
-	 */
-	protected onInit(): void {
-		this.instance.on('slide:after', this.handleSlideChange);
-		if (this.options.instant === true) {
-			this.play();
-		}
-	}
-
-	/**
-	 * Method called when the instance is destroyed.
-	 */
-	protected onDestroy(): void {
-		this.instance.off('slide:after', this.handleSlideChange);
-		this.pause(false);
 	}
 
 	/**

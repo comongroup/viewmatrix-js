@@ -9,6 +9,7 @@
 		"allowJs": true
 	},
 	"include": [
+		"./index.ts",
 		"./src/**/*"
 	]
 }
