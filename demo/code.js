@@ -51,11 +51,12 @@ bind('.example-3-pause', 'click', function () { example3autoplay.pause(); });
 
 // EXAMPLE 4 - SWIPE
 
+var example4touch;
 var example4 = new ViewMatrix('.example-4', {
 	infinite: true,
 }, function (p) {
 	return [
-		new p.TouchSwipePlugin({
+		example4touch = new p.TouchSwipePlugin({
 			preventDefault: true,
 			vertical: true
 		})
