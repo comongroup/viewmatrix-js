@@ -1,4 +1,4 @@
-interface IStringDictionary { [id: string]: string; }
+export interface IStringDictionary { [id: string]: string; }
 
 /**
  * Class aliases that ViewMatrix supports for its elements.

@@ -1,7 +1,7 @@
 // based off of component-emitter package
 // https://github.com/component/emitter
 
-type EmitterCallback = (...args: any[]) => void;
+export type EmitterCallback = (...args: any[]) => void;
 
 export default abstract class Emitter {
 

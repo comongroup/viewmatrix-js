@@ -8,11 +8,11 @@ import IViewMatrixClassAliases from './iviewmatrixclassaliases';
 import IViewMatrixOptions from './iviewmatrixoptions';
 import ViewMatrixPlugin from './viewmatrixplugin';
 
-interface IPluginDictionary {
+export interface IPluginDictionary {
 	[id: string]: typeof ViewMatrixPlugin;
 }
 
-type PluginConstructor = (p: IPluginDictionary) => ViewMatrixPlugin[];
+export type PluginConstructor = (p: IPluginDictionary) => ViewMatrixPlugin[];
 
 export default class ViewMatrix extends Emitter {
 
