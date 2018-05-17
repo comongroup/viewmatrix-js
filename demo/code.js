@@ -26,9 +26,10 @@ bind('.example-2-next', 'click', function () { example2.inc(+1); });
 
 // EXAMPLE 3 - AUTOPLAY
 
+var example3autoplay;
 var example3 = new ViewMatrix('.example-3', {}, function (p) {
 	return [
-		new p.AutoplayPlugin({
+		example3autoplay = new p.AutoplayPlugin({
 			interval: 3000
 		})
 	]

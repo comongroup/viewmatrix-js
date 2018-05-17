@@ -48,7 +48,7 @@ export default class AutoplayPlugin extends ViewMatrixPlugin {
 	/**
 	 * Determines if autoplay should be cancelled when handling a slide change.
 	 */
-	private cancelAutoplay: boolean = true;
+	private cancelAutoplay: boolean = false;
 
 	/**
 	 * ID of the setInterval instance.
