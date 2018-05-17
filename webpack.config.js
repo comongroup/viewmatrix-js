@@ -15,7 +15,7 @@ module.exports = {
 	devtool: 'source-map',
 
 	entry: {
-		viewmatrix: './src/index.ts'
+		viewmatrix: './index.ts'
 	},
 
 	output: {
