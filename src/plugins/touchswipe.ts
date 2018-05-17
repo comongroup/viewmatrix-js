@@ -12,6 +12,10 @@ export interface ITouchSwipePluginOptions {
 	 */
 	classAlias?: string;
 	/**
+	 * Tells the plugin what elements it should add touch event listeners to.
+	 */
+	eventTarget?: Document | Element;
+	/**
 	 * Tells the plugin it should call preventDefault() when a touch is started. Default is `false`.
 	 */
 	preventDefault?: boolean;
@@ -37,10 +41,16 @@ export default class TouchSwipePlugin extends ViewMatrixPlugin {
 	 */
 	private readonly defaults: ITouchSwipePluginOptions = {
 		classAlias: 'touching',
-		preventDefault: false,
+		eventTarget: document,
+		preventDefault: true,
 		tolerance: 30,
 		vertical: false
 	};
+
+	/**
+	 * Determines which was the last event target.
+	 */
+	private eventTarget?: Document | Element = undefined;
 
 	/**
 	 * Point with starting touch coordinates.
@@ -77,15 +87,20 @@ export default class TouchSwipePlugin extends ViewMatrixPlugin {
 	public onInit(): void {
 		this.cancelTouch(false);
 
-		// add touch events
-		document.addEventListener('touchstart', this.handleTouchStart, { passive: false });
-		document.addEventListener('touchmove', this.handleTouchMove, { passive: false });
-		document.addEventListener('touchend', this.handleTouchEnd, { passive: false });
+		// setup event target for future events
+		this.eventTarget = this.options.eventTarget;
 
-		// add mouse events
-		document.addEventListener('mousedown', this.handleTouchStart, { passive: false });
-		document.addEventListener('mousemove', this.handleTouchMove, { passive: false });
-		document.addEventListener('mouseup', this.handleTouchEnd, { passive: false });
+		if (this.eventTarget) {
+			// add touch events
+			this.eventTarget.addEventListener('touchstart', this.handleTouchStart, { passive: false });
+			this.eventTarget.addEventListener('touchmove', this.handleTouchMove, { passive: false });
+			this.eventTarget.addEventListener('touchend', this.handleTouchEnd, { passive: false });
+
+			// add mouse events
+			this.eventTarget.addEventListener('mousedown', this.handleTouchStart, { passive: false });
+			this.eventTarget.addEventListener('mousemove', this.handleTouchMove, { passive: false });
+			this.eventTarget.addEventListener('mouseup', this.handleTouchEnd, { passive: false });
+		}
 	}
 
 	/**
@@ -94,15 +109,20 @@ export default class TouchSwipePlugin extends ViewMatrixPlugin {
 	public onDestroy(): void {
 		this.cancelTouch(false);
 
-		// cancel touch events
-		document.removeEventListener('touchstart', this.handleTouchStart);
-		document.removeEventListener('touchmove', this.handleTouchMove);
-		document.removeEventListener('touchend', this.handleTouchEnd);
+		if (this.eventTarget) {
+			// cancel touch events
+			this.eventTarget.removeEventListener('touchstart', this.handleTouchStart);
+			this.eventTarget.removeEventListener('touchmove', this.handleTouchMove);
+			this.eventTarget.removeEventListener('touchend', this.handleTouchEnd);
 
-		// cancel mouse events
-		document.removeEventListener('mousedown', this.handleTouchStart);
-		document.removeEventListener('mousemove', this.handleTouchMove);
-		document.removeEventListener('mouseup', this.handleTouchEnd);
+			// cancel mouse events
+			this.eventTarget.removeEventListener('mousedown', this.handleTouchStart);
+			this.eventTarget.removeEventListener('mousemove', this.handleTouchMove);
+			this.eventTarget.removeEventListener('mouseup', this.handleTouchEnd);
+
+			// nullify the event target because we don't need it anymore
+			this.eventTarget = undefined;
+		}
 	}
 
 	/**
@@ -131,7 +151,7 @@ export default class TouchSwipePlugin extends ViewMatrixPlugin {
 			this.touchStart = coords;
 			this.touchLast = coords;
 			this.target = this.instance.element;
-			if (this.options.preventDefault) {
+			if (this.options.preventDefault && event.cancelable) {
 				event.preventDefault();
 			}
 			if (this.options.classAlias) {
