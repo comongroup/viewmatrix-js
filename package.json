@@ -5,6 +5,7 @@
   "author": "comOn Group",
   "license": "ISC",
   "homepage": "https://comongroup.github.io/viewmatrix.js",
+  "typings": "bin/types/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/comongroup/viewmatrix.js.git"
