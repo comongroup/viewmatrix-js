@@ -12,6 +12,20 @@ export declare function addClassToElement(el: HTMLElement, str: string): void;
  */
 export declare function findChildrenInElement(el: HTMLElement, selector?: string): HTMLElement[];
 /**
+ * Returns the bounding rectangle for the target element,
+ * but adjusted with the scroll values of the parent.
+ * @param el The element to find bounds for.
+ * @param parent The parent of the element to check bounds for. Default is "document.body".
+ */
+export declare function getAbsoluteRect(el: HTMLElement, parent?: HTMLElement): {
+    bottom: number;
+    height: number;
+    left: number;
+    right: number;
+    top: number;
+    width: number;
+};
+/**
  * Checks if the given `coords` are contained within a `target`.
  * @param target The target to check.
  * @param coords The coordinates to check if they're inside the Target.

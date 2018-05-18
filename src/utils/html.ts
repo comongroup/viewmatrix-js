@@ -30,14 +30,34 @@ export function findChildrenInElement(el: HTMLElement, selector?: string): HTMLE
 }
 
 /**
+ * Returns the bounding rectangle for the target element,
+ * but adjusted with the scroll values of the parent.
+ * @param el The element to find bounds for.
+ * @param parent The parent of the element to check bounds for. Default is "document.body".
+ */
+export function getAbsoluteRect(el: HTMLElement, parent: HTMLElement = document.body) {
+	const parentBounds = parent.getBoundingClientRect();
+	const elBounds = el.getBoundingClientRect();
+	return {
+		bottom: elBounds.bottom - parentBounds.top,
+		height: elBounds.height,
+		left: elBounds.left - parentBounds.left,
+		right: elBounds.right - parentBounds.left,
+		top: elBounds.top - parentBounds.top,
+		width: elBounds.width
+	};
+}
+
+/**
  * Checks if the given `coords` are contained within a `target`.
  * @param target The target to check.
  * @param coords The coordinates to check if they're inside the Target.
  */
 export function inElementBounds(target: HTMLElement, coords: Point) {
+	const bounds = getAbsoluteRect(target);
 	return target &&
-		coords.x >= target.offsetLeft && coords.x <= target.offsetLeft + target.offsetWidth &&
-		coords.y >= target.offsetTop && coords.y <= target.offsetTop + target.offsetHeight;
+		coords.x >= bounds.left && coords.x <= bounds.right &&
+		coords.y >= bounds.top && coords.y <= bounds.bottom;
 }
 
 /**
