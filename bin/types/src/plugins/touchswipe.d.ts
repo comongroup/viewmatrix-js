@@ -50,10 +50,6 @@ export default class TouchSwipePlugin extends ViewMatrixPlugin {
      */
     private touchDelta?;
     /**
-     * Current touch target.
-     */
-    private target?;
-    /**
      * Initializes a new TouchSwipePlugin instance.
      * @param options Options for the plugin.
      */

@@ -68,11 +68,6 @@ export default class TouchSwipePlugin extends ViewMatrixPlugin {
 	private touchDelta?: Point = undefined;
 
 	/**
-	 * Current touch target.
-	 */
-	private target?: HTMLElement = undefined;
-
-	/**
 	 * Initializes a new TouchSwipePlugin instance.
 	 * @param options Options for the plugin.
 	 */
@@ -134,11 +129,10 @@ export default class TouchSwipePlugin extends ViewMatrixPlugin {
 			this.instance.toggleClass(this.options.classAlias, false);
 		}
 		if (emit !== false) {
-			this.instance.emit('touch:cancel', this.target, this.touchLast);
+			this.instance.emit('touchswipe:cancel', this.touchLast);
 		}
 		this.touchStart = undefined;
 		this.touchLast = undefined;
-		this.target = undefined;
 	}
 
 	/**
@@ -147,17 +141,19 @@ export default class TouchSwipePlugin extends ViewMatrixPlugin {
 	 */
 	private handleTouchStart = (event: MouseEvent | TouchEvent) => {
 		const coords = Point.getFromEvent(event);
-		if (!this.touchStart && inElementBounds(this.instance.element, coords)) {
+		const target = this.eventTarget !== document
+			? this.eventTarget as HTMLElement
+			: this.instance.element;
+		if (!this.touchStart && inElementBounds(target, coords)) {
 			this.touchStart = coords;
 			this.touchLast = coords;
-			this.target = this.instance.element;
 			if (this.options.preventDefault && event.cancelable) {
 				event.preventDefault();
 			}
 			if (this.options.classAlias) {
 				this.instance.toggleClass(this.options.classAlias, true);
 			}
-			this.instance.emit('touch:start', this.target, coords);
+			this.instance.emit('touchswipe:start', coords);
 		}
 	}
 
@@ -169,7 +165,7 @@ export default class TouchSwipePlugin extends ViewMatrixPlugin {
 		if (!this.touchStart) { return; }
 		this.touchLast = Point.getFromEvent(event);
 		this.touchDelta = this.touchStart.clone().sub(this.touchLast);
-		this.instance.emit('touch:move', this.target, this.touchDelta, this.cancelTouch);
+		this.instance.emit('touchswipe:move', this.touchDelta, this.cancelTouch);
 
 		const xAbs = Math.abs(this.touchDelta.x);
 		const yAbs = Math.abs(this.touchDelta.y);
@@ -185,12 +181,12 @@ export default class TouchSwipePlugin extends ViewMatrixPlugin {
 		}
 
 		if (delta > this.options.tolerance) {
-			this.instance.emit('swipe:next', this.target, this.touchDelta);
+			this.instance.emit('touchswipe:next', this.touchDelta);
 			this.instance.inc(+1);
 			this.cancelTouch(false);
 		}
 		else if (delta < -this.options.tolerance) {
-			this.instance.emit('swipe:prev', this.target, this.touchDelta);
+			this.instance.emit('touchswipe:prev', this.touchDelta);
 			this.instance.inc(-1);
 			this.cancelTouch(false);
 		}
@@ -202,7 +198,7 @@ export default class TouchSwipePlugin extends ViewMatrixPlugin {
 	 */
 	private handleTouchEnd = (event: MouseEvent | TouchEvent) => {
 		if (!this.touchStart) { return; }
-		this.instance.emit('touch:end', this.target, this.touchLast);
+		this.instance.emit('touchswipe:end', this.touchLast);
 		this.cancelTouch(false);
 	}
 
