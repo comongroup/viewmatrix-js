@@ -9,10 +9,6 @@ export default interface IViewMatrixOptions {
 	 */
 	adjacentCount?: number;
 	/**
-	 * Optional selector for selecting children inside the main element.
-	 */
-	childrenSelector?: string;
-	/**
 	 * Class aliases that should be applied.
 	 */
 	classAliases?: IViewMatrixClassAliases;

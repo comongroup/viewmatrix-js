@@ -1,0 +1,8 @@
+{
+	"editor.detectIndentation": false,
+	"editor.insertSpaces": false,
+	"search.exclude": {
+		"**/dist": true,
+		"**/types": true
+	}
+}

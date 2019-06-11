@@ -1,7 +1,7 @@
 {
   "name": "viewmatrix.js",
-  "version": "0.2.3",
-  "description": "Javascript media browsing component",
+  "version": "0.3.0",
+  "description": "Javascript carousel instance.",
   "author": "comOn Group",
   "license": "ISC",
   "homepage": "https://comongroup.github.io/viewmatrix.js",
@@ -17,14 +17,13 @@
     "start": "webpack --watch --config webpack.config.js",
     "build": "webpack --config webpack.config.js"
   },
+  "main": "dist/viewmatrix.min.js",
   "devDependencies": {
-    "clean-webpack-plugin": "^0.1.19",
-    "fork-ts-checker-webpack-plugin": "^0.4.1",
-    "ts-loader": "^4.3.0",
-    "tslint": "^5.10.0",
-    "typescript": "^2.8.3",
-    "webpack": "^4.8.3",
-    "webpack-cli": "^2.1.3"
-  },
-  "dependencies": {}
+    "clean-webpack-plugin": "^3.0.0",
+    "ts-loader": "^6.0.2",
+    "tslint": "^5.17.0",
+    "typescript": "^3.5.1",
+    "webpack": "^4.33.0",
+    "webpack-cli": "^3.3.4"
+  }
 }

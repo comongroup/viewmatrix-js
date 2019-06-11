@@ -1,13 +1,11 @@
 const path = require('path');
 const webpack = require('webpack');
 const package = require('./package.json');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
-const resolve = function(dir) {
+function resolve(dir) {
 	return path.join(__dirname, dir)
 };
-
-const CleanWebpackPlugin = require('clean-webpack-plugin');
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 module.exports = {
 
@@ -19,13 +17,14 @@ module.exports = {
 	},
 
 	output: {
-		path: resolve('bin'),
-		filename: './[name].min.js'
+		path: resolve('dist'),
+		filename: './[name].min.js',
+		library: 'ViewMatrix',
+		libraryExport: 'default'
 	},
 
 	module: {
 		rules: [
-
 			{
 				test: /\.tsx?$/,
 				exclude: /node_modules/,
@@ -36,12 +35,11 @@ module.exports = {
 					}
 				}
 			}
-
 		]
 	},
 
 	plugins: [
-		new CleanWebpackPlugin(['bin']),
+		new CleanWebpackPlugin(),
 		new webpack.BannerPlugin({
 			banner: `name: [name]\nversion: ${package.version}\nhash: [hash]`
 		})

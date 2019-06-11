@@ -6,12 +6,6 @@ import Point from './point';
  */
 export declare function addClassToElement(el: HTMLElement, str: string): void;
 /**
- * Returns children inside an element.
- * @param el The element to return children from.
- * @param selector Query selector to filter children.
- */
-export declare function findChildrenInElement(el: HTMLElement, selector?: string): HTMLElement[];
-/**
  * Returns the bounding rectangle for the target element,
  * but adjusted with the scroll values of the parent.
  * @param el The element to find bounds for.

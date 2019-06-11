@@ -1,7 +1,7 @@
 import AutoplayPlugin from '../plugins/autoplay';
 import TouchSwipePlugin from '../plugins/touchswipe';
 import Emitter from '../utils/emitter';
-import { addClassToElement, findChildrenInElement, removeClassFromElement, setElementStyle, toggleClassInElement } from '../utils/html';
+import { addClassToElement, removeClassFromElement, setElementStyle, toggleClassInElement } from '../utils/html';
 import { clamp, wrap } from '../utils/math';
 import { merge } from '../utils/objects';
 import IViewMatrixClassAliases from './iviewmatrixclassaliases';
@@ -16,34 +16,22 @@ export type PluginConstructor = (p: IPluginDictionary) => ViewMatrixPlugin[];
 
 export default class ViewMatrix extends Emitter {
 
-	/**
-	 * The instance's target element.
-	 */
+	/** The instance's target element. */
 	public element: HTMLElement;
 
-	/**
-	 * The instance's options.
-	 */
+	/** The instance's options. */
 	public readonly options: IViewMatrixOptions;
 
-	/**
-	 * The ViewMatrix instance's children.
-	 */
+	/** The instance's children. */
 	private children: HTMLElement[] = null;
 
-	/**
-	 * List of ViewMatrixPlugin instances associated with the instance.
-	 */
+	/** List of ViewMatrixPlugin instances associated with the instance. */
 	private plugins: ViewMatrixPlugin[] = [];
 
-	/**
-	 * The class' instance defaults.
-	 */
+	/** The class' instance defaults. */
 	private readonly defaults: IViewMatrixOptions = {
 		// state init
 		startingIndex: 0,
-		// selectors
-		childrenSelector: '*',
 		// classes
 		classAliases: {
 			element: 'element',
@@ -62,23 +50,20 @@ export default class ViewMatrix extends Emitter {
 		wrap: true
 	};
 
-	/**
-	 * List of class names frequently used for children elements.
-	 */
+	/** List of class names frequently used for children elements. */
 	private classAliases: { [id: string]: string } = {};
 
-	/**
-	 * Current slide's index.
-	 */
+	/** Current slide's index. */
 	private currentIndex: number = 0;
 
 	/**
 	 * Creates a new ViewMatrix instance.
-	 * @param selector The target selector or element for the instance.
+	 * @param rootSelector The target selector or element for the instance.
 	 * @param options Options for the instance.
+	 * @param plugins Plugins for the instance.
 	 */
 	constructor(
-		parentSelector: string | HTMLElement,
+		rootSelector: string | HTMLElement,
 		options?: IViewMatrixOptions,
 		plugins?: ViewMatrixPlugin[] | PluginConstructor
 	) {
@@ -101,41 +86,37 @@ export default class ViewMatrix extends Emitter {
 		}
 
 		// initialize
-		this.initialize(parentSelector, this.options.childrenSelector);
+		this.initialize(rootSelector);
 	}
 
 	/**
 	 * Refreshes the instance.
-	 * @param parentSelector The query selector to find the element.
-	 * @param childrenSelector An optional query selector to filter children.
+	 * @param rootSelector The query selector to find the element.
 	 */
-	public initialize(parentSelector: string | HTMLElement, childrenSelector?: string): void {
+	public initialize(rootSelector: string | HTMLElement): void {
 		// destroy first
 		this.destroy();
 
-		// get a valid selector
-		parentSelector = parentSelector != null ? parentSelector : null;
+		// get a valid root selector
+		rootSelector = rootSelector != null ? rootSelector : null;
 
 		// check if we have an object,
 		// if we do, POPULATE ALL THE VARS
-		if (typeof parentSelector === 'string') {
-			this.element = document.querySelector(parentSelector) || null;
+		if (typeof rootSelector === 'string') {
+			this.element = document.querySelector(rootSelector) || null;
 		}
-		else if (parentSelector instanceof HTMLElement) {
-			this.element = parentSelector;
+		else if (rootSelector instanceof HTMLElement) {
+			this.element = rootSelector;
 		}
 
 		// do we still have a target?
 		// if not, throw a hissy fit
 		if (!this.element) {
-			throw new Error('No valid selector provided to ViewMatrix instance');
+			throw new Error('No valid element or selector provided to ViewMatrix instance');
 		}
 
-		// (also update the selectors in the options to these)
-		if (typeof childrenSelector === 'string') { this.options.childrenSelector = childrenSelector; }
-
 		// set children and index
-		this.children = findChildrenInElement(this.element, childrenSelector);
+		this.children = [].slice.call(this.element.children) as HTMLElement[];
 		this.currentIndex = this.wrapIndex(this.currentIndex);
 
 		// add classes to new children
@@ -309,10 +290,9 @@ export default class ViewMatrix extends Emitter {
 	 * @param index Index to wrap.
 	 */
 	private wrapIndex(index: number): number {
-		const max = this.children.length - 1;
 		return this.options.wrap
-			? wrap(index, 0, max)
-			: clamp(index, 0, max);
+			? wrap(index, 0, this.children.length)
+			: clamp(index, 0, this.children.length);
 	}
 
 	/**

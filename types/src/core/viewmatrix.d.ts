@@ -6,46 +6,32 @@ export interface IPluginDictionary {
 }
 export declare type PluginConstructor = (p: IPluginDictionary) => ViewMatrixPlugin[];
 export default class ViewMatrix extends Emitter {
-    /**
-     * The instance's target element.
-     */
+    /** The instance's target element. */
     element: HTMLElement;
-    /**
-     * The instance's options.
-     */
+    /** The instance's options. */
     readonly options: IViewMatrixOptions;
-    /**
-     * The ViewMatrix instance's children.
-     */
+    /** The instance's children. */
     private children;
-    /**
-     * List of ViewMatrixPlugin instances associated with the instance.
-     */
+    /** List of ViewMatrixPlugin instances associated with the instance. */
     private plugins;
-    /**
-     * The class' instance defaults.
-     */
+    /** The class' instance defaults. */
     private readonly defaults;
-    /**
-     * List of class names frequently used for children elements.
-     */
+    /** List of class names frequently used for children elements. */
     private classAliases;
-    /**
-     * Current slide's index.
-     */
+    /** Current slide's index. */
     private currentIndex;
     /**
      * Creates a new ViewMatrix instance.
-     * @param selector The target selector or element for the instance.
+     * @param rootSelector The target selector or element for the instance.
      * @param options Options for the instance.
+     * @param plugins Plugins for the instance.
      */
-    constructor(parentSelector: string | HTMLElement, options?: IViewMatrixOptions, plugins?: ViewMatrixPlugin[] | PluginConstructor);
+    constructor(rootSelector: string | HTMLElement, options?: IViewMatrixOptions, plugins?: ViewMatrixPlugin[] | PluginConstructor);
     /**
      * Refreshes the instance.
-     * @param parentSelector The query selector to find the element.
-     * @param childrenSelector An optional query selector to filter children.
+     * @param rootSelector The query selector to find the element.
      */
-    initialize(parentSelector: string | HTMLElement, childrenSelector?: string): void;
+    initialize(rootSelector: string | HTMLElement): void;
     /**
      * Destroys the ViewMatrix instance.
      */
@@ -71,18 +57,18 @@ export default class ViewMatrix extends Emitter {
      * @param prefix Prefix for all class aliases.
      * @param aliases String dictionary of class aliases.
      */
-    private prepareClassNames(prefix?, aliases?);
+    private prepareClassNames;
     /**
      * Wraps a given "index" to be safe for the instance to use.
      * @param index Index to wrap.
      */
-    private wrapIndex(index);
+    private wrapIndex;
     /**
      * Invokes the `onInit` method on all registered plugins.
      */
-    private initializePlugins();
+    private initializePlugins;
     /**
      * Invokes the `onDestroy` method on all registered plugins.
      */
-    private destroyPlugins();
+    private destroyPlugins;
 }
